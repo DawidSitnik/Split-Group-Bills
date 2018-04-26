@@ -6,6 +6,8 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
 import android.provider.Settings;
+import android.support.design.widget.TabLayout;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -21,6 +23,11 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private android.support.v7.widget.Toolbar mainToolbar;
 
+    private ViewPager viewPager;
+
+    private TabLayout tabLayout;
+
+    private SectionsPagerAdapter sectionsPagerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,9 +51,19 @@ public class MainActivity extends AppCompatActivity {
 
             mAuth = FirebaseAuth.getInstance();
 
+            //tabs
+            viewPager = findViewById(R.id.main_tabPager);
+            sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+
+            viewPager.setAdapter(sectionsPagerAdapter);
+
+            tabLayout = findViewById(R.id.main_tabs);
+            tabLayout.setupWithViewPager(viewPager);
+
+
             mainToolbar = findViewById(R.id.main_page_toolbar);
             setSupportActionBar(mainToolbar);
-            getSupportActionBar().setTitle("SitnikSB Chat");
+            getSupportActionBar().setTitle("Talk to Sitnik");
 
     }
 
@@ -80,11 +97,18 @@ public class MainActivity extends AppCompatActivity {
 
         super.onOptionsItemSelected(item);
 
-        if(item.getItemId() == R.id.main_logout_btn){
+        if(item.getItemId() == R.id.main_logout_btn) {
 
             FirebaseAuth.getInstance().signOut();
             sendToStart();
         }
+
+        if(item.getItemId() == R.id.main__settings_btn){
+            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+            startActivity(intent);
+        }
+
+
 
         return true;
     }
@@ -119,5 +143,7 @@ public class MainActivity extends AppCompatActivity {
         }
         return false;
     }
+
+
 
 }
