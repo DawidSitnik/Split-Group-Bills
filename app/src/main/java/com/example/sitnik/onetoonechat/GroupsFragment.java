@@ -3,12 +3,15 @@ package com.example.sitnik.onetoonechat;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -25,9 +28,13 @@ import com.squareup.picasso.Picasso;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 
-public class FriendsFragment extends Fragment {
+public class GroupsFragment extends Fragment {
 
     private RecyclerView mFriendList;
+
+    private FloatingActionButton mAddFriendButton;
+
+    private View mMainView;
 
     private DatabaseReference mFriendsDatabase;
     private DatabaseReference mUsersDatabase;
@@ -36,29 +43,38 @@ public class FriendsFragment extends Fragment {
 
     private String mCurrentUserId;
 
-    private View mMainView;
-
     private Query query;
 
-    public FriendsFragment() {
+    public GroupsFragment() {
         // Required empty public constructor
     }
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        mMainView = inflater.inflate(R.layout.fragment_friends, container, false);
+// DOKONCZYC TEN ADAPTER, SKONCZYLEM DOPIERO NA DODANIU Child "groups"
 
-        mFriendList = mMainView.findViewById(R.id.friends_list);
+        mMainView = inflater.inflate(R.layout.fragment_groups, container, false);
+
+        mAddFriendButton = mMainView.findViewById(R.id.btn_add_group);
+
+        mAddFriendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getContext(), AddGroupName.class);
+                startActivity(intent);
+            }
+        });
+
+        mFriendList = mMainView.findViewById(R.id.groups_list);
         mFriendList.setHasFixedSize(true);
         mFriendList.setLayoutManager(new LinearLayoutManager(getContext()));
 
         mAuth = FirebaseAuth.getInstance();
         mCurrentUserId = mAuth.getCurrentUser().getUid();
 
-        mFriendsDatabase = FirebaseDatabase.getInstance().getReference().child("Friends").child(mCurrentUserId);
+        mFriendsDatabase = FirebaseDatabase.getInstance().getReference().child("Users").child(mCurrentUserId).child("groups");
         mFriendsDatabase.keepSynced(true);
         mUsersDatabase = FirebaseDatabase.getInstance().getReference().child("Users");
         mUsersDatabase.keepSynced(true);
@@ -72,12 +88,12 @@ public class FriendsFragment extends Fragment {
                         .build();
 
 
-        FirebaseRecyclerAdapter<Friends, FriendsFragment.FriendsViewHolder> adapter = new FirebaseRecyclerAdapter<Friends, FriendsViewHolder>(options) {
+        FirebaseRecyclerAdapter<Friends, FriendsFragment.FriendsViewHolder> adapter = new FirebaseRecyclerAdapter<Friends, FriendsFragment.FriendsViewHolder>(options) {
             @Override
             public FriendsFragment.FriendsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
                 // Create a new instance of the ViewHolder, in this case we are using a custom
                 // layout called R.layout.message for each item
-                return new FriendsViewHolder(LayoutInflater.from(parent.getContext())
+                return new FriendsFragment.FriendsViewHolder(LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.users_single_layout, parent, false));
             }
 

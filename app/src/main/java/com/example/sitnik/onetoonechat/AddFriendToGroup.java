@@ -1,15 +1,16 @@
 package com.example.sitnik.onetoonechat;
 
-
 import android.content.Intent;
+import android.os.Handler;
+import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
@@ -22,42 +23,49 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 
-
-public class FriendsFragment extends Fragment {
+public class AddFriendToGroup extends AppCompatActivity {
 
     private RecyclerView mFriendList;
 
     private DatabaseReference mFriendsDatabase;
     private DatabaseReference mUsersDatabase;
+    private DatabaseReference mDatabaseRef;
 
     private FirebaseAuth mAuth;
 
     private String mCurrentUserId;
 
-    private View mMainView;
-
     private Query query;
 
-    public FriendsFragment() {
-        // Required empty public constructor
-    }
+    private TextView mGroupName;
+
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_add_friend_to_group);
 
-        mMainView = inflater.inflate(R.layout.fragment_friends, container, false);
+        final String group_name = getIntent().getStringExtra("group_name");
 
-        mFriendList = mMainView.findViewById(R.id.friends_list);
+        mGroupName = findViewById(R.id.tv_group_name);
+        mGroupName.setText(group_name);
+
+        mFriendList = findViewById(R.id.friend_to_group_list);
         mFriendList.setHasFixedSize(true);
-        mFriendList.setLayoutManager(new LinearLayoutManager(getContext()));
+        mFriendList.setLayoutManager(new LinearLayoutManager(AddFriendToGroup.this));
 
         mAuth = FirebaseAuth.getInstance();
         mCurrentUserId = mAuth.getCurrentUser().getUid();
 
+        mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         mFriendsDatabase = FirebaseDatabase.getInstance().getReference().child("Friends").child(mCurrentUserId);
         mFriendsDatabase.keepSynced(true);
         mUsersDatabase = FirebaseDatabase.getInstance().getReference().child("Users");
@@ -72,12 +80,12 @@ public class FriendsFragment extends Fragment {
                         .build();
 
 
-        FirebaseRecyclerAdapter<Friends, FriendsFragment.FriendsViewHolder> adapter = new FirebaseRecyclerAdapter<Friends, FriendsViewHolder>(options) {
+        FirebaseRecyclerAdapter<Friends, FriendsFragment.FriendsViewHolder> adapter = new FirebaseRecyclerAdapter<Friends, FriendsFragment.FriendsViewHolder>(options) {
             @Override
             public FriendsFragment.FriendsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
                 // Create a new instance of the ViewHolder, in this case we are using a custom
                 // layout called R.layout.message for each item
-                return new FriendsViewHolder(LayoutInflater.from(parent.getContext())
+                return new FriendsFragment.FriendsViewHolder(LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.users_single_layout, parent, false));
             }
 
@@ -85,6 +93,7 @@ public class FriendsFragment extends Fragment {
             protected void onBindViewHolder(final FriendsFragment.FriendsViewHolder friendsViewHolder, int position, final Friends friends) {
 
                 final String list_user_id = getRef(position).getKey();
+                final String user_id = getRef(position).getKey();
 
                 mUsersDatabase.child(list_user_id).addValueEventListener(new ValueEventListener() {
                     @Override
@@ -108,9 +117,45 @@ public class FriendsFragment extends Fragment {
                     @Override
                     public void onClick(View v) {
 
-                        Intent profileIntent = new Intent(getContext(), ProfileActivity.class);
-                        profileIntent.putExtra("user_id", list_user_id);
-                        startActivity(profileIntent);
+                        final String currentDate = DateFormat.getDateTimeInstance().format(new Date());
+                        Map memberMap = new HashMap();
+                        memberMap.put("Groups/" + group_name + "/" + user_id + "/date", currentDate  );
+                        memberMap.put("Users/"+ user_id + "/groups/" + group_name + "/role", "member");
+
+
+                        mDatabaseRef.updateChildren(memberMap, new DatabaseReference.CompletionListener() {
+                            @Override
+                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+
+                                if(databaseError != null){
+                                    String error = databaseError.getMessage();
+                                    Toast.makeText(AddFriendToGroup.this, error, Toast.LENGTH_LONG);
+                                }
+
+                                else{
+
+                                    Toast.makeText(AddFriendToGroup.this, "Friend added to group", Toast.LENGTH_LONG).show();
+                                }
+
+
+                            }
+                        });
+
+
+
+
+                        final Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                finish();
+                            }
+                        }, 3000);
+
+                        //  Intent intent = new Intent(AddFriendToGroup.this, CreateGroupActivity.class);
+                        // intent.putExtra("group_name", group_name);
+                        //  startActivity(intent);
+                        //finish();
 
                     }
                 });
@@ -120,10 +165,8 @@ public class FriendsFragment extends Fragment {
 
         mFriendList.setAdapter(adapter);
 
-        return mMainView;
+
     }
-
-
 
     public static class FriendsViewHolder extends RecyclerView.ViewHolder{
 
@@ -153,7 +196,5 @@ public class FriendsFragment extends Fragment {
 
 
     }
-
-
 
 }

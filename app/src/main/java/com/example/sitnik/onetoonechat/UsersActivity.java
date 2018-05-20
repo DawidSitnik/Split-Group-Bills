@@ -50,7 +50,7 @@ public class UsersActivity extends AppCompatActivity {
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        query = FirebaseDatabase.getInstance().getReference().child("Users").limitToLast(50);
+        query = FirebaseDatabase.getInstance().getReference().child("Users");
 
         FirebaseRecyclerOptions<Users> options =
                 new FirebaseRecyclerOptions.Builder<Users>()
