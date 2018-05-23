@@ -2,6 +2,7 @@ package com.example.sitnik.onetoonechat;
 
 import android.content.Intent;
 import android.media.Image;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -76,6 +77,9 @@ public class UsersActivity extends AppCompatActivity {
                 usersViewHolder.setThumbImage(users.getThumb_image());
 
                 final String user_id = getRef(position).getKey();
+
+                FloatingActionButton deleteButton = usersViewHolder.mView.findViewById(R.id.btn_delete_user);
+                deleteButton.setVisibility(View.INVISIBLE);
 
                 usersViewHolder.mView.setOnClickListener(new View.OnClickListener() {
                     @Override

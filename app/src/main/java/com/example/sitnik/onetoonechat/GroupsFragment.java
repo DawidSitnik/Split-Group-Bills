@@ -38,6 +38,7 @@ public class GroupsFragment extends Fragment {
 
     private DatabaseReference mFriendsDatabase;
     private DatabaseReference mUsersDatabase;
+    private DatabaseReference mDatabase;
 
     private FirebaseAuth mAuth;
 
@@ -52,8 +53,6 @@ public class GroupsFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
-// DOKONCZYC TEN ADAPTER, SKONCZYLEM DOPIERO NA DODANIU Child "groups"
 
         mMainView = inflater.inflate(R.layout.fragment_groups, container, false);
 
@@ -78,8 +77,9 @@ public class GroupsFragment extends Fragment {
         mFriendsDatabase.keepSynced(true);
         mUsersDatabase = FirebaseDatabase.getInstance().getReference().child("Users");
         mUsersDatabase.keepSynced(true);
+        mDatabase = FirebaseDatabase.getInstance().getReference();
 
-        query = FirebaseDatabase.getInstance().getReference().child("Friends");
+        query = FirebaseDatabase.getInstance().getReference().child("Users").child(mCurrentUserId).child("groups");
 
         FirebaseRecyclerOptions<Friends> options =
                 new FirebaseRecyclerOptions.Builder<Friends>()
@@ -102,31 +102,38 @@ public class GroupsFragment extends Fragment {
 
                 final String list_user_id = getRef(position).getKey();
 
-                mUsersDatabase.child(list_user_id).addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        String userName = dataSnapshot.child("name").getValue().toString();
-                        String userThumb = dataSnapshot.child("thumb_image").getValue().toString();
-                        String userStatus = dataSnapshot.child("status").getValue().toString();
+                //HIDE DELETE BUTTON
+                FloatingActionButton deleteButton = friendsViewHolder.mView.findViewById(R.id.btn_delete_user);
+                deleteButton.setVisibility(View.INVISIBLE);
 
-                        friendsViewHolder.setName(userName);
-                        friendsViewHolder.setStatus(userStatus);
-                        friendsViewHolder.setThumbImage(userThumb);
-                    }
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
+                //HIDE STATUS
+                TextView hideStatus = friendsViewHolder.mView.findViewById(R.id.single_user_status);
+                hideStatus.setVisibility(View.INVISIBLE);
 
-                    }
-                });
+                    mUsersDatabase.child(mCurrentUserId).child("groups").child(list_user_id).addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            String groupName = dataSnapshot.getKey().toString();
+                            String groupThumbImage = dataSnapshot.child("thumb_image").getValue().toString();
+
+                            friendsViewHolder.setThumbImage(groupThumbImage);
+                            friendsViewHolder.setName(groupName);
+
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+
 
                 friendsViewHolder.mView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
 
-                        Intent profileIntent = new Intent(getContext(), ProfileActivity.class);
-                        profileIntent.putExtra("user_id", list_user_id);
-                        startActivity(profileIntent);
+
 
                     }
                 });

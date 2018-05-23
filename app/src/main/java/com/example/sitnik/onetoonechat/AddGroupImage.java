@@ -55,6 +55,9 @@ public class AddGroupImage extends AppCompatActivity {
 
     private ProgressDialog progressDialog;
 
+    private FirebaseAuth mAuth;
+    private String mCurrentUserId;
+
 
     private static final int GALLERY_PICK = 1;
 
@@ -72,6 +75,9 @@ public class AddGroupImage extends AppCompatActivity {
 
         mButtonImage = findViewById(R.id.img_group);
 
+        mAuth = FirebaseAuth.getInstance();
+        mCurrentUserId = mAuth.getCurrentUser().getUid();
+
         mStorageReference = FirebaseStorage.getInstance().getReference();
 
         mSubmitImage.setOnClickListener(new View.OnClickListener() {
@@ -80,6 +86,7 @@ public class AddGroupImage extends AppCompatActivity {
                 Intent intent = new Intent(AddGroupImage.this, CreateGroupActivity.class);
                 intent.putExtra("group_name", group_name);
                 startActivity(intent);
+                finish();
 
             }
         });
@@ -204,10 +211,21 @@ public class AddGroupImage extends AppCompatActivity {
                                                 public void onComplete(@NonNull Task<Void> task) {
                                                     if(task.isSuccessful()){
 
-                                                        progressDialog.dismiss();
+
                                                         Toast.makeText(AddGroupImage.this, "Uploading image to database succesful", Toast.LENGTH_LONG).show();
                                                     }
 
+                                                }
+                                            });
+
+                                            mDatabaseRef.child("Users").child(mCurrentUserId).child("groups").child(group_name).updateChildren(update_hashMap).addOnCompleteListener(new OnCompleteListener() {
+                                                @Override
+                                                public void onComplete(@NonNull Task task) {
+                                                    if(task.isSuccessful()){
+
+                                                        progressDialog.dismiss();
+                                                        Toast.makeText(AddGroupImage.this, "Uploading image to user database succesful", Toast.LENGTH_LONG).show();
+                                                    }
                                                 }
                                             });
                                         }

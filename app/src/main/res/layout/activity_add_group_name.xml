@@ -6,6 +6,9 @@
     android:layout_height="match_parent"
     tools:context=".AddGroupName">
 
+
+
+
     <EditText
         android:id="@+id/tv_group_name"
         android:layout_width="wrap_content"
@@ -24,11 +27,12 @@
         android:id="@+id/et_add_group_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="200dp"
+        android:layout_marginTop="150dp"
         android:text="Add Group Name"
         android:textColor="@color/colorPrimaryDark"
         android:textSize="26dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

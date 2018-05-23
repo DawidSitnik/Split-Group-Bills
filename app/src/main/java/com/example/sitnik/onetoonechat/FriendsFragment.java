@@ -3,6 +3,7 @@ package com.example.sitnik.onetoonechat;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -10,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
@@ -22,6 +24,9 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 
 
@@ -31,6 +36,7 @@ public class FriendsFragment extends Fragment {
 
     private DatabaseReference mFriendsDatabase;
     private DatabaseReference mUsersDatabase;
+    private DatabaseReference mDatabase;
 
     private FirebaseAuth mAuth;
 
@@ -62,6 +68,7 @@ public class FriendsFragment extends Fragment {
         mFriendsDatabase.keepSynced(true);
         mUsersDatabase = FirebaseDatabase.getInstance().getReference().child("Users");
         mUsersDatabase.keepSynced(true);
+        mDatabase = FirebaseDatabase.getInstance().getReference();
 
         query = FirebaseDatabase.getInstance().getReference().child("Friends");
 
@@ -86,6 +93,9 @@ public class FriendsFragment extends Fragment {
 
                 final String list_user_id = getRef(position).getKey();
 
+                FloatingActionButton deleteButton = friendsViewHolder.mView.findViewById(R.id.btn_delete_user);
+                deleteButton.setVisibility(View.INVISIBLE);
+
                 mUsersDatabase.child(list_user_id).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -108,9 +118,11 @@ public class FriendsFragment extends Fragment {
                     @Override
                     public void onClick(View v) {
 
-                        Intent profileIntent = new Intent(getContext(), ProfileActivity.class);
-                        profileIntent.putExtra("user_id", list_user_id);
-                        startActivity(profileIntent);
+                        Map addBillMap = new HashMap();
+
+                        Intent intent = new Intent(getContext(), ShareWithFriend.class);
+                        intent.putExtra("user_id", list_user_id);
+                        startActivity(intent);
 
                     }
                 });

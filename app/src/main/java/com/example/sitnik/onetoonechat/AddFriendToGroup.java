@@ -2,6 +2,7 @@ package com.example.sitnik.onetoonechat;
 
 import android.content.Intent;
 import android.os.Handler;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -45,6 +46,9 @@ public class AddFriendToGroup extends AppCompatActivity {
     private Query query;
 
     private TextView mGroupName;
+
+    private CircleImageView mUserImage;
+
 
 
 
@@ -95,6 +99,9 @@ public class AddFriendToGroup extends AppCompatActivity {
                 final String list_user_id = getRef(position).getKey();
                 final String user_id = getRef(position).getKey();
 
+                FloatingActionButton deleteButton = friendsViewHolder.mView.findViewById(R.id.btn_delete_user);
+                deleteButton.setVisibility(View.INVISIBLE);
+
                 mUsersDatabase.child(list_user_id).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -113,49 +120,54 @@ public class AddFriendToGroup extends AppCompatActivity {
                     }
                 });
 
-                friendsViewHolder.mView.setOnClickListener(new View.OnClickListener() {
+                mUserImage = friendsViewHolder.mView.findViewById(R.id.user_single_image);
+                mUserImage.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
 
-                        final String currentDate = DateFormat.getDateTimeInstance().format(new Date());
-                        Map memberMap = new HashMap();
-                        memberMap.put("Groups/" + group_name + "/" + user_id + "/date", currentDate  );
-                        memberMap.put("Users/"+ user_id + "/groups/" + group_name + "/role", "member");
 
-
-                        mDatabaseRef.updateChildren(memberMap, new DatabaseReference.CompletionListener() {
+                        mDatabaseRef.child("Groups").child(group_name).addValueEventListener(new ValueEventListener() {
                             @Override
-                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                            public void onDataChange(DataSnapshot dataSnapshot) {
 
-                                if(databaseError != null){
-                                    String error = databaseError.getMessage();
-                                    Toast.makeText(AddFriendToGroup.this, error, Toast.LENGTH_LONG);
-                                }
+                                final String currentDate = DateFormat.getDateTimeInstance().format(new Date());
+                                String group_image = dataSnapshot.child("image").getValue().toString();
+                                String group_thumb_image = dataSnapshot.child("thumb_image").getValue().toString();
 
-                                else{
+                                Map memberMap = new HashMap();
+                                memberMap.put("Groups/" + group_name + "/members/" + user_id + "/date", currentDate  );
+                                memberMap.put("Users/"+ user_id + "/groups/" + group_name + "/role", "member");
+                                memberMap.put("Users/" + user_id + "/groups/" + group_name + "/image", group_image);
+                                memberMap.put("Users/" + user_id + "/groups/" + group_name + "/thumb_image", group_thumb_image);
 
-                                    Toast.makeText(AddFriendToGroup.this, "Friend added to group", Toast.LENGTH_LONG).show();
-                                }
 
+                                mDatabaseRef.updateChildren(memberMap, new DatabaseReference.CompletionListener() {
+                                    @Override
+                                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+
+                                        if(databaseError != null){
+                                            String error = databaseError.getMessage();
+                                            Toast.makeText(AddFriendToGroup.this, error, Toast.LENGTH_LONG);
+                                        }
+
+                                        else{
+
+                                            Toast.makeText(AddFriendToGroup.this, "Friend added to group", Toast.LENGTH_LONG).show();
+                                        }
+
+
+                                    }
+                                });
+
+                                finish();
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
 
                             }
                         });
 
-
-
-
-                        final Handler handler = new Handler();
-                        handler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                finish();
-                            }
-                        }, 3000);
-
-                        //  Intent intent = new Intent(AddFriendToGroup.this, CreateGroupActivity.class);
-                        // intent.putExtra("group_name", group_name);
-                        //  startActivity(intent);
-                        //finish();
 
                     }
                 });
@@ -175,12 +187,14 @@ public class AddFriendToGroup extends AppCompatActivity {
         public FriendsViewHolder(View itemView){
             super(itemView);
             mView = itemView;
+
         }
 
 
         public void setName(String name){
             TextView userNameView = mView.findViewById(R.id.single_user_name);
             userNameView.setText(name);
+
         }
 
         public void setStatus(String status){

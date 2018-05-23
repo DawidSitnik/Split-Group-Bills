@@ -1,7 +1,6 @@
 package com.example.sitnik.onetoonechat;
 
 import android.content.Intent;
-import android.media.MediaSync;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -30,6 +29,8 @@ public class AddGroupName extends AppCompatActivity {
 
     private FirebaseUser mCurrentUser;
 
+    private String group_name;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,6 +38,9 @@ public class AddGroupName extends AppCompatActivity {
 
         mGroupName = findViewById(R.id.tv_group_name);
         mSubmitGroupName = findViewById(R.id.btn_submit_name);
+
+        group_name = mGroupName.getText().toString();
+
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
 
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -55,8 +59,12 @@ public class AddGroupName extends AppCompatActivity {
 
                     final String currentDate = DateFormat.getDateTimeInstance().format(new Date());
                     Map memberMap = new HashMap();
-                    memberMap.put("Groups/" + mGroupName.getText().toString() + "/" + mCurrentUser.getUid() + "/date", currentDate );
+                    memberMap.put("Groups/" + mGroupName.getText().toString() + "/members/" + mCurrentUser.getUid() + "/date", currentDate );
+                    memberMap.put("Groups/" + mGroupName.getText().toString() + "/image", "default" );
+                    memberMap.put("Groups/" + mGroupName.getText().toString() + "/thumb_image", "default" );
                     memberMap.put("Users/" + mCurrentUser.getUid() + "/groups/" + mGroupName.getText().toString() +"/role", "creator" );
+                    memberMap.put("Users/" + mCurrentUser.getUid() + "/groups/" + mGroupName.getText().toString() + "/image", "default");
+                    memberMap.put("Users/" + mCurrentUser.getUid() + "/groups/" + mGroupName.getText().toString() + "/thumb_image", "default");
 
 
                     mDatabaseRef.updateChildren(memberMap, new DatabaseReference.CompletionListener() {
@@ -78,12 +86,16 @@ public class AddGroupName extends AppCompatActivity {
                     });
 
 
-                    Intent intent = new Intent(AddGroupName.this, CreateGroupActivity.class);
+                    Intent intent = new Intent(AddGroupName.this, AddGroupImage.class);
                     intent.putExtra("group_name", mGroupName.getText().toString());
                     startActivity(intent);
+                    finish();
                 }
             }
         });
 
     }
+
+
+
 }

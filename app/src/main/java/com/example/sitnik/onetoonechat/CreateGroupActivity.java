@@ -10,6 +10,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,6 +37,7 @@ public class CreateGroupActivity extends AppCompatActivity {
     private Toolbar mToolbarGroup;
 
     private FloatingActionButton mAddToFriend;
+    private Button mCreateGroup;
 
     private TextView mGroupName;
 
@@ -43,6 +45,7 @@ public class CreateGroupActivity extends AppCompatActivity {
 
     private DatabaseReference databaseReference;
     private DatabaseReference mUsersDatabase;
+    private DatabaseReference mDatabaseRef;
 
     private FirebaseAuth mAuth;
 
@@ -51,7 +54,6 @@ public class CreateGroupActivity extends AppCompatActivity {
     private Query query;
 
     private String group_name;
-
 
 
     @Override
@@ -64,7 +66,7 @@ public class CreateGroupActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("Create Group");
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 
-
+        mCreateGroup = findViewById(R.id.btn_create_group);
 
         mAddToFriend = findViewById(R.id.btn_add_to_group);
         mAddToFriend.setOnClickListener(new View.OnClickListener() {
@@ -86,6 +88,8 @@ public class CreateGroupActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         mCurrentUserId = mAuth.getCurrentUser().getUid();
 
+        mDatabaseRef = FirebaseDatabase.getInstance().getReference();
+
         mUsersDatabase = FirebaseDatabase.getInstance().getReference().child("Users");
         mUsersDatabase.keepSynced(true);
 
@@ -93,7 +97,17 @@ public class CreateGroupActivity extends AppCompatActivity {
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        query = FirebaseDatabase.getInstance().getReference().child("Groups").child(group_name);
+        query = FirebaseDatabase.getInstance().getReference().child("Groups").child(group_name).child("members");
+
+        mCreateGroup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(CreateGroupActivity.this, MainActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+
     }
 
 
@@ -109,23 +123,6 @@ public class CreateGroupActivity extends AppCompatActivity {
 
 
     protected void displayViewHolder(){
-
-//        group_name = getIntent().getStringExtra("group_name");
-//
-//        mGroupName = findViewById(R.id.tv_group_name);
-//        mGroupName.setText(group_name);
-//
-//        mAuth = FirebaseAuth.getInstance();
-//        mCurrentUserId = mAuth.getCurrentUser().getUid();
-//
-//        mUsersDatabase = FirebaseDatabase.getInstance().getReference().child("Users");
-//        mUsersDatabase.keepSynced(true);
-//
-//        mRecyclerView = findViewById(R.id.list_group_members);
-//        mRecyclerView.setHasFixedSize(true);
-//        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-//
-//        query = FirebaseDatabase.getInstance().getReference().child("Groups").child(group_name);
 
         FirebaseRecyclerOptions<Friends> options =
                 new FirebaseRecyclerOptions.Builder<Friends>()
@@ -146,6 +143,31 @@ public class CreateGroupActivity extends AppCompatActivity {
             protected void onBindViewHolder(final FriendsViewHolder friendsViewHolder, int position, final Friends friends) {
 
                 final String list_user_id = getRef(position).getKey();
+                final String user_id = getRef(position).getKey();
+
+                FloatingActionButton deleteButton = friendsViewHolder.mView.findViewById(R.id.btn_delete_user);
+                deleteButton.setVisibility(View.VISIBLE);
+
+                deleteButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        if (user_id.equals(mCurrentUserId)) {
+
+                            Toast.makeText(CreateGroupActivity.this, "You can not remove yourself from the group.", Toast.LENGTH_LONG).show();
+
+                        } else {
+
+
+
+                        Map deleteMemberMap = new HashMap();
+
+                        deleteMemberMap.put("Groups/" + group_name + "/members/" + user_id, null);
+
+                        mDatabaseRef.updateChildren(deleteMemberMap);
+                    }
+                    }
+                });
 
                 if(mUsersDatabase.child(list_user_id) != null) {
                     mUsersDatabase.child(list_user_id).addValueEventListener(new ValueEventListener() {
@@ -170,13 +192,13 @@ public class CreateGroupActivity extends AppCompatActivity {
 
             }
 
-            //usunac
+
 
         };
 
 
         mRecyclerView.setAdapter(adapter);
-        adapter.notifyDataSetChanged();
+        //adapter.notifyDataSetChanged();
 
     }
 
@@ -205,9 +227,6 @@ public class CreateGroupActivity extends AppCompatActivity {
             Picasso.get().load(thumb_image).placeholder(R.drawable.default_avatar).into(userImageView);
         }
 
-        public void refresh() {
-
-        }
 
     }
 }

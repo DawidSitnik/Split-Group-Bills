@@ -69,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
             setSupportActionBar(mainToolbar);
             getSupportActionBar().setTitle("Talk to Sitnik");
 
-            mUserRef = FirebaseDatabase.getInstance().getReference().child("Users").child(mAuth.getCurrentUser().getUid());
 
     }
 
@@ -88,17 +87,13 @@ public class MainActivity extends AppCompatActivity {
         if (currentUser == null) {
             sendToStart();
 
-        } else {
-
-            mUserRef.child("online").setValue(true);
-
         }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        mUserRef.child("online").setValue(false);
+
 
     }
 

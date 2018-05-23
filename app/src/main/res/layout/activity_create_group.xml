@@ -61,7 +61,7 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/list_group_members"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="306dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
@@ -76,5 +76,20 @@
         tools:ignore="MissingConstraints">
 
     </android.support.v7.widget.RecyclerView>
+
+    <Button
+        android:id="@+id/btn_create_group"
+        style="@style/Widget.AppCompat.Button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/colorAccent"
+        android:text="Create"
+        android:textColor="@color/common_google_signin_btn_text_dark_default"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/list_group_members" />
 
 </android.support.constraint.ConstraintLayout>
