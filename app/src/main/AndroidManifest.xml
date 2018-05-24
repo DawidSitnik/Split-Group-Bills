@@ -59,7 +59,12 @@
         <activity
             android:name=".ShareWithFriend"
             android:parentActivityName=".MainActivity" />
-        <activity android:name=".AddBill"></activity>
+        <activity android:name=".AddBill"
+            android:parentActivityName=".ShareWithFriend"/>
+        <activity android:name=".SettleUp"
+            android:parentActivityName=".ShareWithFriend"/>
+        <activity android:name=".BillDetails"
+            android:parentActivityName=".ShareWithFriend"></activity>
     </application>
 
 </manifest>

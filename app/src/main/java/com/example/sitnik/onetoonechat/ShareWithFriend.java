@@ -12,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -24,12 +23,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.NetworkPolicy;
+
 import com.squareup.picasso.Picasso;
 
-import java.util.HashMap;
-import java.util.Map;
+
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -46,9 +43,6 @@ public class ShareWithFriend extends AppCompatActivity {
     private TextView mName;
     private TextView mAmount;
 
-    private View mMainView;
-
-    private DatabaseReference mFriendsDatabase;
     private DatabaseReference mDatabase;
 
     private FirebaseAuth mAuth;
@@ -56,13 +50,13 @@ public class ShareWithFriend extends AppCompatActivity {
 
     private Query query;
 
+    private double billAmount2;
     private String who_ows;
-
-    private int billAmount2;
     private String billWhoOws;
     private String billWhoLend;
     private String billPayedBy;
     private String billAmount;
+    private String balance, borrower;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,10 +82,20 @@ public class ShareWithFriend extends AppCompatActivity {
         mBillsList.setHasFixedSize(true);
         mBillsList.setLayoutManager(new LinearLayoutManager(ShareWithFriend.this));
 
-        mFriendsDatabase = FirebaseDatabase.getInstance().getReference().child("Friends").child(mCurrentUserId);
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
         final String user_id = getIntent().getStringExtra("user_id");
+
+        //SETTLE UP LISTENER
+        mSettleUp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent intent = new Intent(ShareWithFriend.this, SettleUp.class);
+                intent.putExtra("user_id", user_id);
+                startActivity(intent);
+            }
+        });
 
         //FILLING FRIEND INFO
         mDatabase.addValueEventListener(new ValueEventListener() {
@@ -101,7 +105,8 @@ public class ShareWithFriend extends AppCompatActivity {
                 String name = dataSnapshot.child("Users").child(user_id).child("name").getValue().toString();
                 String thumb_image = dataSnapshot.child("Users").child(user_id).child("thumb_image").getValue().toString();
                 String amount = dataSnapshot.child("Friends").child(mCurrentUserId).child(user_id).child("balance").getValue().toString();
-                String borrower = dataSnapshot.child("Friends").child(mCurrentUserId).child(user_id).child("borrower").getValue().toString();
+                balance = dataSnapshot.child("Friends").child(mCurrentUserId).child(user_id).child("balance").getValue().toString();
+                borrower = dataSnapshot.child("Friends").child(mCurrentUserId).child(user_id).child("borrower").getValue().toString();
                 String friend_name = dataSnapshot.child("Users").child(user_id).child("name").getValue().toString();
 
                 mName.setText(name);
@@ -165,15 +170,26 @@ public class ShareWithFriend extends AppCompatActivity {
                 mDatabase.child("Friends").child(mCurrentUserId).child(user_id).child("bills").child(list_user_id).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
+
                         String billDescription = dataSnapshot.child("description").getValue().toString();
                         billPayedBy = dataSnapshot.child("payed_by").getValue().toString();
                         billAmount = dataSnapshot.child("amount").getValue().toString();
+                        billAmount2 = Double.parseDouble(billAmount) / 2; //chyba bedzie w zaleznosci od wybranej opcji
 
-                        billAmount2 = Integer.parseInt(billAmount) / 2; //chyba bedzie w zaleznosci od wybranej opcji
-
-                        billsViewHolder.setDescription(billDescription);
-                        billsViewHolder.setWhoLend();
                         billsViewHolder.setWhoOws();
+
+                        if(billDescription.equals("settle_up")){
+                            billsViewHolder.setWhoLendEmpty();
+                            billsViewHolder.setDescription("Settle Up");
+                            billsViewHolder.setSettleUpImage();
+                        }
+
+                        if(!billDescription.equals("settle_up")){
+
+                            billsViewHolder.setWhoLend();
+                            billsViewHolder.setDescription(billDescription);
+                            billsViewHolder.setDefaultImage();
+                        }
                     }
 
                     @Override
@@ -182,25 +198,21 @@ public class ShareWithFriend extends AppCompatActivity {
                     }
                 });
 
-//                billsViewHolder.mView.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//
-//                        Map addBillMap = new HashMap();
-//
-//                        Intent intent = new Intent(ShareWithFriend.this, ShareWithFriend.class);
-//                        intent.putExtra("user_id", list_user_id);
-//                        startActivity(intent);
-//
-//                    }
-//                });
+                billsViewHolder.mView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        Intent intent = new Intent (ShareWithFriend.this, BillDetails.class);
+                        intent.putExtra("bill_date", list_user_id);
+                        intent.putExtra("user_id", user_id);
+                        startActivity(intent);
+
+                    }
+                });
             }
         };
 
-
         mBillsList.setAdapter(adapter);
-
-
 
     }
 
@@ -247,6 +259,20 @@ public class ShareWithFriend extends AppCompatActivity {
             singleWhoLend.setText(billWhoLend);
         }
 
+        public void setSettleUpImage(){
+            CircleImageView mImage = mView.findViewById(R.id.bill_single_image);
+            mImage.setImageResource(R.drawable.settle_up);
+        }
+
+        public void setDefaultImage() {
+            CircleImageView mImage = mView.findViewById(R.id.bill_single_image);
+            mImage.setImageResource(R.drawable.bill);
+        }
+
+        public void setWhoLendEmpty(){
+            TextView singleWhoLend = mView.findViewById(R.id.single_bill_whoLend);
+            singleWhoLend.setText("");
+        }
     }
 
 

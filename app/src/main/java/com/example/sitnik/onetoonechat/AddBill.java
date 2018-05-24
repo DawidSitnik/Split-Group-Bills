@@ -1,12 +1,17 @@
 package com.example.sitnik.onetoonechat;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -42,6 +47,14 @@ public class AddBill extends AppCompatActivity {
     private String description;
     private String user_id;
     private String date;
+    private String splitting_type;
+
+    private double balanceDouble, amountDouble;
+
+    private Spinner mSpinner;
+    private static final String[]paths = {"Paid by you and split equally", "Paid by the other person and split equally", "You owe the full amount", "They owe the full amount", "More options"};
+
+    Map addBillMap = new HashMap();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +68,7 @@ public class AddBill extends AppCompatActivity {
 
         mDescription = findViewById(R.id.addBill_description);
         mAmount = findViewById(R.id.addBill_amount);
+        mSpinner = findViewById(R.id.addBill_spinner);
 
         mAdd = findViewById(R.id.addBill_add);
 
@@ -106,9 +120,28 @@ public class AddBill extends AppCompatActivity {
 
                 else {
 
-                    payedByMeSplitEqualy();
+                    switch (splitting_type) {
+                        case "paid_by_me_split_equally":
 
+                            paidByMeSplitEqually("friend", "me");
+                            break;
+                        case "paid_by_other_person_split_equally":
 
+                            paidByOtherPersonSplitEqually("me", "friend");
+                            break;
+                        case "you_owe_the_full_amount":
+
+                            youOweTheFullAMount("friend", "me");
+                            break;
+                        case "they_owe_the_full_amount":
+
+                            theyOweTheFullAmount("me", "friend");
+                            break;
+                        case "more_options":
+
+                            moreOptions();
+                            break;
+                    }
 
                     finish();
                 }
@@ -118,17 +151,53 @@ public class AddBill extends AppCompatActivity {
         });
 
 
+        ArrayAdapter<String>adapter = new ArrayAdapter<String>(AddBill.this,
+                android.R.layout.simple_spinner_item,paths);
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mSpinner.setAdapter(adapter);
+        mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                ((TextView) parent.getChildAt(0)).setTextColor((Color.parseColor("#091321"))); //chyba cos nie dziala
+
+                switch (position) {
+                    case 0:
+                        splitting_type = "paid_by_me_split_equally";
+                        break;
+                    case 1:
+                        splitting_type = "paid_by_other_person_split_equally";
+                        break;
+                    case 2:
+                        splitting_type = "you_owe_the_full_amount";
+                        break;
+                    case 3:
+                        splitting_type = "they_owe_the_full_amount";
+                        break;
+                    case 4:
+                        splitting_type = "more_options";
+                        break;
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
     }
 
-    private void payedByMeSplitEqualy(){
+
+    private void checkIfBalance0(String borrower1, String borrower2){
 
         if(balance.equals("0")){
             Map startMap = new HashMap();
-            startMap.put("Friends/" + mCurrentUserId + "/" + user_id + "/borrower", "friend");
-            startMap.put("Friends/" + user_id + "/" + mCurrentUserId + "/borrower", "me");
+            startMap.put("Friends/" + mCurrentUserId + "/" + user_id + "/borrower", borrower1);
+            startMap.put("Friends/" + user_id + "/" + mCurrentUserId + "/borrower", borrower2);
 
-            borrower = "me";
+            borrower = borrower2;
 
             mDatabase.updateChildren(startMap, new DatabaseReference.CompletionListener() {
                 @Override
@@ -138,46 +207,41 @@ public class AddBill extends AppCompatActivity {
                         String error = databaseError.getMessage();
                         Toast.makeText(AddBill.this, error, Toast.LENGTH_LONG);
                     } else {
-
                         Toast.makeText(AddBill.this, "Borrower added.", Toast.LENGTH_LONG).show();
                     }
-
-
                 }
             });
         }
 
+    }
 
-        int balanceInt = Integer.parseInt(balance);
-        int amountInt = Integer.parseInt(amount);
+    private void paidBySplitEqually(String borrower1, String borrower2){
 
-        Map addBillMap = new HashMap();
+        if(borrower.equals(borrower2)){
+            balanceDouble = balanceDouble - amountDouble;
 
-        if(borrower.equals("me")){ //if we paied more than we owed we are changing a borrower
-            balanceInt = balanceInt - amountInt;
-
-            if (amountInt > balanceInt){
-                addBillMap.put("Friends/" + mCurrentUserId + "/" + user_id + "/borrower", "friend");
-                addBillMap.put("Friends/" + user_id + "/" + mCurrentUserId + "/borrower", "me");
-                balanceInt = -balanceInt;
+            if (amountDouble > balanceDouble){
+                addBillMap.put("Friends/" + mCurrentUserId + "/" + user_id + "/borrower", borrower1);
+                addBillMap.put("Friends/" + user_id + "/" + mCurrentUserId + "/borrower", borrower2);
+                balanceDouble = -balanceDouble;
             }
         }
         else {
-            balanceInt = balanceInt + amountInt;
+            balanceDouble = balanceDouble + amountDouble;
         }
 
         date = DateFormat.getDateTimeInstance().format(new Date());
         addBillMap.put("Friends/" + mCurrentUserId + "/" + user_id + "/bills/" + date + "/amount", amount);
         addBillMap.put("Friends/" + user_id + "/" + mCurrentUserId + "/bills/" + date + "/amount", amount);
 
-        addBillMap.put("Friends/" + mCurrentUserId + "/" + user_id + "/bills/" + date + "/payed_by", "me");
-        addBillMap.put("Friends/" + user_id + "/" + mCurrentUserId + "/bills/" + date + "/payed_by", "friend");
+        addBillMap.put("Friends/" + mCurrentUserId + "/" + user_id + "/bills/" + date + "/payed_by", borrower2);
+        addBillMap.put("Friends/" + user_id + "/" + mCurrentUserId + "/bills/" + date + "/payed_by", borrower1);
 
         addBillMap.put("Friends/" + mCurrentUserId + "/" + user_id + "/bills/" + date + "/description", description);
         addBillMap.put("Friends/" + user_id + "/" + mCurrentUserId + "/bills/" + date + "/description", description);
 
-        addBillMap.put("Friends/" + mCurrentUserId + "/" + user_id + "/balance", balanceInt);
-        addBillMap.put("Friends/" + user_id + "/" + mCurrentUserId + "/balance", balanceInt);
+        addBillMap.put("Friends/" + mCurrentUserId + "/" + user_id + "/balance", balanceDouble);
+        addBillMap.put("Friends/" + user_id + "/" + mCurrentUserId + "/balance", balanceDouble);
 
 
         mDatabase.updateChildren(addBillMap, new DatabaseReference.CompletionListener() {
@@ -197,4 +261,57 @@ public class AddBill extends AppCompatActivity {
         });
 
     }
+
+    private void paidByMeSplitEqually(String borrower1, String borrower2){
+
+        checkIfBalance0(borrower1, borrower2);
+
+        balanceDouble = Double.parseDouble(balance);
+        amountDouble = Double.parseDouble(amount) / 2;
+
+        paidBySplitEqually(borrower1, borrower2);
+    }
+
+
+
+    private void paidByOtherPersonSplitEqually(String borrower1, String borrower2) { // borrower1 = me, borrower2 = friend
+
+        checkIfBalance0(borrower1, borrower2);
+
+        balanceDouble = Double.parseDouble(balance);
+        amountDouble = Double.parseDouble(amount) / 2;
+
+        paidBySplitEqually(borrower1, borrower2);
+
+    }
+
+
+    private void youOweTheFullAMount(String borrower1, String borrower2) {
+
+        checkIfBalance0(borrower1, borrower2);
+
+        balanceDouble = Double.parseDouble(balance);
+        amountDouble = Double.parseDouble(amount);
+
+        paidBySplitEqually(borrower1, borrower2);
+
+    }
+
+
+    private void theyOweTheFullAmount(String borrower1, String borrower2) {
+
+        checkIfBalance0(borrower1, borrower2);
+
+        balanceDouble = Double.parseDouble(balance);
+        amountDouble = Double.parseDouble(amount);
+
+        paidBySplitEqually(borrower1, borrower2);
+
+    }
+
+
+    private void moreOptions() {
+    }
+
+
 }

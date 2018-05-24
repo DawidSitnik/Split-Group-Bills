@@ -8,8 +8,8 @@
 
     <TextView
         android:id="@+id/bill_single_ows"
-        android:layout_width="85dp"
-        android:layout_height="19dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
 
         android:layout_alignStart="@+id/single_user_name"
@@ -25,7 +25,7 @@
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/bill_single_image"
-        android:layout_width="56dp"
+        android:layout_width="55dp"
         android:layout_height="55dp"
         android:layout_marginBottom="8dp"
         android:layout_marginLeft="8dp"
@@ -39,10 +39,12 @@
 
     <TextView
         android:id="@+id/bill_single_description"
-        android:layout_width="200dp"
+        android:layout_width="300dp"
         android:layout_height="30dp"
         android:layout_alignParentEnd="true"
         android:layout_alignTop="@+id/user_single_image"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:ems="10"
         android:inputType="textPersonName"
@@ -50,15 +52,15 @@
         android:textColor="@color/colorDarkGreyBackground"
         android:textSize="20dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.375"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/bill_single_image"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/single_bill_whoLend"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="14dp"
         android:layout_marginEnd="4dp"
         android:layout_marginRight="4dp"
         android:text="You something"

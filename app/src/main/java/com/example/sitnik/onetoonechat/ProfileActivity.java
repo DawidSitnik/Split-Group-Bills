@@ -290,6 +290,9 @@ public class ProfileActivity extends AppCompatActivity {
                     friendsMap.put("Friends/" + mCurrentUser.getUid() + "/" + userId + "/balance", 0);
                     friendsMap.put("Friends/" + userId + "/" + mCurrentUser.getUid() + "/balance", 0);
 
+                    friendsMap.put("Friends/" + mCurrentUser.getUid() + "/" + userId + "/borrower", "none");
+                    friendsMap.put("Friends/" + userId + "/" + mCurrentUser.getUid() + "/borrower", "none");
+
                     friendsMap.put("Friend_req/" + mCurrentUser.getUid() + "/" + userId + "/date", null);
                     friendsMap.put("Friend_req/" + userId + "/" + mCurrentUser.getUid() + "/date", null);
 

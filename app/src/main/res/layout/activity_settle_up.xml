@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".SettleUp">
+
+    <include
+        android:id="@+id/users_appBar"
+        layout="@layout/app_bar_layout"
+        android:layout_height="56dp" />
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/settleUp_lender"
+        android:layout_width="104dp"
+        android:layout_height="101dp"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="40dp"
+        android:layout_marginRight="40dp"
+        android:layout_marginTop="72dp"
+        android:padding="5dp"
+        android:src="@drawable/default_avatar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/imageView2"
+        app:layout_constraintTop_toBottomOf="@+id/users_appBar" />
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/settleUp_borrower"
+        android:layout_width="104dp"
+        android:layout_height="101dp"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="40dp"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="72dp"
+        android:padding="5dp"
+        android:src="@drawable/default_avatar"
+        app:layout_constraintEnd_toStartOf="@+id/imageView2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/users_appBar" />
+
+    <ImageView
+        android:id="@+id/settleUp_arrow"
+        android:layout_width="93dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="92dp"
+        app:layout_constraintEnd_toStartOf="@+id/settleUp_lender"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/settleUp_borrower"
+        app:layout_constraintTop_toBottomOf="@+id/users_appBar"
+        app:srcCompat="@drawable/arrow" />
+
+    <TextView
+        android:id="@+id/settleUp_whoPaid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="60dp"
+        android:text="Someone payed somebody"
+        android:textColor="@color/colorDarkGreyBackground"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.505"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/settleUp_arrow" />
+
+    <EditText
+        android:id="@+id/settleUp_amount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:gravity="center_horizontal"
+        android:hint="0.00"
+        android:inputType="textPersonName|numberSigned"
+        android:textColor="@color/colorDarkGreyBackground"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.505"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/settleUp_whoPaid" />
+
+    <Button
+        android:id="@+id/settleUp_submit"
+        style="@style/Widget.AppCompat.Button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="68dp"
+        android:background="@color/colorAccent"
+        android:text="Settle Up"
+        android:textColor="@android:color/background_light"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/settleUp_amount" />
+
+
+</android.support.constraint.ConstraintLayout>
