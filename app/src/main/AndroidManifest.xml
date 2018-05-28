@@ -59,12 +59,25 @@
         <activity
             android:name=".ShareWithFriend"
             android:parentActivityName=".MainActivity" />
-        <activity android:name=".AddBill"
-            android:parentActivityName=".ShareWithFriend"/>
-        <activity android:name=".SettleUp"
-            android:parentActivityName=".ShareWithFriend"/>
-        <activity android:name=".BillDetails"
-            android:parentActivityName=".ShareWithFriend"></activity>
+        <activity
+            android:name=".AddBill"
+            android:parentActivityName=".ShareWithFriend" />
+        <activity
+            android:name=".SettleUp"
+            android:parentActivityName=".ShareWithFriend" />
+        <activity
+            android:name=".BillDetails"
+            android:parentActivityName=".ShareWithFriend" />
+        <activity android:name=".ShareWithGroup" />
+        <activity
+            android:name=".AddBillGroup"
+            android:parentActivityName=".ShareWithGroup" />
+        <activity
+            android:name=".PopOutSplittingType"
+            android:theme="@style/AppTheme.PopOut" />
+        <activity
+            android:name=".PopOutPaidBy"
+            android:theme="@style/AppTheme.PopOut"/>
     </application>
 
 </manifest>

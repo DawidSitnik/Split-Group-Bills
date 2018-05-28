@@ -43,7 +43,6 @@ public class CreateGroupActivity extends AppCompatActivity {
 
     private RecyclerView mRecyclerView;
 
-    private DatabaseReference databaseReference;
     private DatabaseReference mUsersDatabase;
     private DatabaseReference mDatabaseRef;
 
@@ -53,7 +52,7 @@ public class CreateGroupActivity extends AppCompatActivity {
 
     private Query query;
 
-    private String group_name;
+    private String group_date, name_display, user_id;
 
 
     @Override
@@ -73,17 +72,17 @@ public class CreateGroupActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(CreateGroupActivity.this, AddFriendToGroup.class);
-                String group_name = mGroupName.getText().toString();
-                intent.putExtra("group_name", group_name);
+                intent.putExtra("group_date", group_date);
                 startActivity(intent);
 
             }
         });
 
-        group_name = getIntent().getStringExtra("group_name");
+        group_date = getIntent().getStringExtra("group_date");
+        name_display = getIntent().getStringExtra("name_display");
 
         mGroupName = findViewById(R.id.tv_group_name);
-        mGroupName.setText(group_name);
+        mGroupName.setText(name_display);
 
         mAuth = FirebaseAuth.getInstance();
         mCurrentUserId = mAuth.getCurrentUser().getUid();
@@ -97,7 +96,7 @@ public class CreateGroupActivity extends AppCompatActivity {
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        query = FirebaseDatabase.getInstance().getReference().child("Groups").child(group_name).child("members");
+        query = FirebaseDatabase.getInstance().getReference().child("Groups").child(group_date).child("members");
 
         mCreateGroup.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -142,8 +141,7 @@ public class CreateGroupActivity extends AppCompatActivity {
             @Override
             protected void onBindViewHolder(final FriendsViewHolder friendsViewHolder, int position, final Friends friends) {
 
-                final String list_user_id = getRef(position).getKey();
-                final String user_id = getRef(position).getKey();
+                user_id = getRef(position).getKey();
 
                 FloatingActionButton deleteButton = friendsViewHolder.mView.findViewById(R.id.btn_delete_user);
                 deleteButton.setVisibility(View.VISIBLE);
@@ -162,15 +160,15 @@ public class CreateGroupActivity extends AppCompatActivity {
 
                         Map deleteMemberMap = new HashMap();
 
-                        deleteMemberMap.put("Groups/" + group_name + "/members/" + user_id, null);
+                        deleteMemberMap.put("Groups/" + group_date + "/members/" + user_id, null);
 
                         mDatabaseRef.updateChildren(deleteMemberMap);
                     }
                     }
                 });
 
-                if(mUsersDatabase.child(list_user_id) != null) {
-                    mUsersDatabase.child(list_user_id).addValueEventListener(new ValueEventListener() {
+                if(mUsersDatabase.child(user_id) != null) {
+                    mUsersDatabase.child(user_id).addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             String userName = dataSnapshot.child("name").getValue().toString();

@@ -56,7 +56,7 @@ public class ShareWithFriend extends AppCompatActivity {
     private String billWhoLend;
     private String billPayedBy;
     private String billAmount;
-    private String balance, borrower;
+    private String balance, borrower, splitting_type;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +85,7 @@ public class ShareWithFriend extends AppCompatActivity {
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
         final String user_id = getIntent().getStringExtra("user_id");
+
 
         //SETTLE UP LISTENER
         mSettleUp.setOnClickListener(new View.OnClickListener() {
@@ -139,6 +140,7 @@ public class ShareWithFriend extends AppCompatActivity {
                 Intent intent = new Intent(ShareWithFriend.this, AddBill.class);
                 intent.putExtra("user_id", user_id);
                 startActivity(intent);
+
             }
         });
 
@@ -174,7 +176,16 @@ public class ShareWithFriend extends AppCompatActivity {
                         String billDescription = dataSnapshot.child("description").getValue().toString();
                         billPayedBy = dataSnapshot.child("payed_by").getValue().toString();
                         billAmount = dataSnapshot.child("amount").getValue().toString();
-                        billAmount2 = Double.parseDouble(billAmount) / 2; //chyba bedzie w zaleznosci od wybranej opcji
+                        splitting_type = dataSnapshot.child("splitting_type").getValue().toString();
+
+                        if(splitting_type.equals("you_owe_the_full_amount") || splitting_type.equals("they_owe_the_full_amount")){
+                            billAmount2 = Double.parseDouble(billAmount);
+                        }else{
+                            billAmount2 = Double.parseDouble(billAmount) / 2;
+                        }
+
+
+
 
                         billsViewHolder.setWhoOws();
 
@@ -205,6 +216,7 @@ public class ShareWithFriend extends AppCompatActivity {
                         Intent intent = new Intent (ShareWithFriend.this, BillDetails.class);
                         intent.putExtra("bill_date", list_user_id);
                         intent.putExtra("user_id", user_id);
+                        intent.putExtra("splitting_type", splitting_type);
                         startActivity(intent);
 
                     }

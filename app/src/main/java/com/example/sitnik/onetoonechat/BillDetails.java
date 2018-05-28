@@ -38,7 +38,7 @@ public class BillDetails extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private String mCurrentUserId;
 
-    private String billPayedBy, billAmount, billDescription, friendName, yourName, user_id, bill_date, detail1, detail2, balance, borrower;
+    private String billPayedBy, billAmount, billDescription, friendName, yourName, user_id, bill_date, detail1, detail2, balance, borrower, splitting_type;
     private double billAmount2;
 
     @Override
@@ -61,6 +61,7 @@ public class BillDetails extends AppCompatActivity {
 
         bill_date = getIntent().getStringExtra("bill_date");
         user_id = getIntent().getStringExtra("user_id");
+        splitting_type = getIntent().getStringExtra("splitting_type");
 
         mDatabase.addValueEventListener(new ValueEventListener() {
             @Override
@@ -71,7 +72,12 @@ public class BillDetails extends AppCompatActivity {
                 billDescription = dataSnapshot.child("Friends").child(mCurrentUserId).child(user_id).child("bills").child(bill_date).child("description").getValue().toString();
                 billPayedBy = dataSnapshot.child("Friends").child(mCurrentUserId).child(user_id).child("bills").child(bill_date).child("payed_by").getValue().toString();
                 billAmount = dataSnapshot.child("Friends").child(mCurrentUserId).child(user_id).child("bills").child(bill_date).child("amount").getValue().toString();
-                billAmount2 = Double.parseDouble(billAmount) / 2; //chyba bedzie w zaleznosci od wybranej opcji
+
+                if(splitting_type.equals("you_owe_the_full_amount") || splitting_type.equals("they_owe_the_full_amount")){
+                    billAmount2 = Double.parseDouble(billAmount);
+                }else{
+                    billAmount2 = Double.parseDouble(billAmount) / 2;
+                }
                 friendName = dataSnapshot.child("Users").child(user_id).child("name").getValue().toString();
                 yourName = dataSnapshot.child("Users").child(mCurrentUserId).child("name").getValue().toString();
 
@@ -154,13 +160,7 @@ public class BillDetails extends AppCompatActivity {
                     }
                 });
 
-finish();
-
-//                       Intent intent = new Intent (BillDetails.this, ShareWithFriend.class);
-//                       intent.putExtra("delete_date", bill_date);
-//                       startActivity(intent);
-
-
+                finish();
 
             }
         });

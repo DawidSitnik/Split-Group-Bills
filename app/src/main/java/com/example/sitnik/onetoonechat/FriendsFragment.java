@@ -70,7 +70,7 @@ public class FriendsFragment extends Fragment {
         mUsersDatabase.keepSynced(true);
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
-        query = FirebaseDatabase.getInstance().getReference().child("Friends");
+        query = FirebaseDatabase.getInstance().getReference().child("Friends").child(mCurrentUserId);
 
         FirebaseRecyclerOptions<Friends> options =
                 new FirebaseRecyclerOptions.Builder<Friends>()

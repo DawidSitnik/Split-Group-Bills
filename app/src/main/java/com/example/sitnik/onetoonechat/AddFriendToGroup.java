@@ -57,10 +57,10 @@ public class AddFriendToGroup extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_friend_to_group);
 
-        final String group_name = getIntent().getStringExtra("group_name");
+        final String group_date = getIntent().getStringExtra("group_date");
 
         mGroupName = findViewById(R.id.tv_group_name);
-        mGroupName.setText(group_name);
+        mGroupName.setText(group_date);
 
         mFriendList = findViewById(R.id.friend_to_group_list);
         mFriendList.setHasFixedSize(true);
@@ -126,7 +126,7 @@ public class AddFriendToGroup extends AppCompatActivity {
                     public void onClick(View v) {
 
 
-                        mDatabaseRef.child("Groups").child(group_name).addValueEventListener(new ValueEventListener() {
+                        mDatabaseRef.child("Groups").child(group_date).addValueEventListener(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
 
@@ -135,10 +135,10 @@ public class AddFriendToGroup extends AppCompatActivity {
                                 String group_thumb_image = dataSnapshot.child("thumb_image").getValue().toString();
 
                                 Map memberMap = new HashMap();
-                                memberMap.put("Groups/" + group_name + "/members/" + user_id + "/date", currentDate  );
-                                memberMap.put("Users/"+ user_id + "/groups/" + group_name + "/role", "member");
-                                memberMap.put("Users/" + user_id + "/groups/" + group_name + "/image", group_image);
-                                memberMap.put("Users/" + user_id + "/groups/" + group_name + "/thumb_image", group_thumb_image);
+                                memberMap.put("Groups/" + group_date + "/members/" + user_id + "/date", currentDate  );
+                                memberMap.put("Users/"+ user_id + "/groups/" + group_date + "/role", "member");
+                                memberMap.put("Users/" + user_id + "/groups/" + group_date + "/image", group_image);
+                                memberMap.put("Users/" + user_id + "/groups/" + group_date + "/thumb_image", group_thumb_image);
 
 
                                 mDatabaseRef.updateChildren(memberMap, new DatabaseReference.CompletionListener() {

@@ -100,7 +100,7 @@ public class GroupsFragment extends Fragment {
             @Override
             protected void onBindViewHolder(final FriendsFragment.FriendsViewHolder friendsViewHolder, int position, final Friends friends) {
 
-                final String list_user_id = getRef(position).getKey();
+                final String group_id = getRef(position).getKey();
 
                 //HIDE DELETE BUTTON
                 FloatingActionButton deleteButton = friendsViewHolder.mView.findViewById(R.id.btn_delete_user);
@@ -111,10 +111,11 @@ public class GroupsFragment extends Fragment {
                 TextView hideStatus = friendsViewHolder.mView.findViewById(R.id.single_user_status);
                 hideStatus.setVisibility(View.INVISIBLE);
 
-                    mUsersDatabase.child(mCurrentUserId).child("groups").child(list_user_id).addValueEventListener(new ValueEventListener() {
+                    mUsersDatabase.child(mCurrentUserId).child("groups").child(group_id).addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
-                            String groupName = dataSnapshot.getKey().toString();
+                          //  String groupName = dataSnapshot.getKey().toString();
+                            String groupName = dataSnapshot.child("name").getValue().toString();
                             String groupThumbImage = dataSnapshot.child("thumb_image").getValue().toString();
 
                             friendsViewHolder.setThumbImage(groupThumbImage);
@@ -133,7 +134,9 @@ public class GroupsFragment extends Fragment {
                     @Override
                     public void onClick(View v) {
 
-
+                    Intent intent = new Intent (getContext(), ShareWithGroup.class);
+                    intent.putExtra("group_id", group_id);
+                    startActivity(intent);
 
                     }
                 });

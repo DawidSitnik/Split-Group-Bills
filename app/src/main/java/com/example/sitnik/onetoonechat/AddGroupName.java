@@ -1,5 +1,6 @@
 package com.example.sitnik.onetoonechat;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -31,6 +32,8 @@ public class AddGroupName extends AppCompatActivity {
 
     private String group_name;
 
+    private ProgressDialog progressDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,14 +62,25 @@ public class AddGroupName extends AppCompatActivity {
 
                     final String currentDate = DateFormat.getDateTimeInstance().format(new Date());
                     Map memberMap = new HashMap();
-                    memberMap.put("Groups/" + mGroupName.getText().toString() + "/members/" + mCurrentUser.getUid() + "/date", currentDate );
-                    memberMap.put("Groups/" + mGroupName.getText().toString() + "/image", "default" );
-                    memberMap.put("Groups/" + mGroupName.getText().toString() + "/thumb_image", "default" );
-                    memberMap.put("Users/" + mCurrentUser.getUid() + "/groups/" + mGroupName.getText().toString() +"/role", "creator" );
-                    memberMap.put("Users/" + mCurrentUser.getUid() + "/groups/" + mGroupName.getText().toString() + "/image", "default");
-                    memberMap.put("Users/" + mCurrentUser.getUid() + "/groups/" + mGroupName.getText().toString() + "/thumb_image", "default");
+                    memberMap.put("Groups/" + currentDate + "/members/" + mCurrentUser.getUid() + "/date", currentDate );
+                    memberMap.put("Groups/" + currentDate + "/name", mGroupName.getText().toString() );
+                    memberMap.put("Groups/" + currentDate + "/image", "default" );
+                    memberMap.put("Groups/" + currentDate + "/thumb_image", "default" );
+
+                    memberMap.put("Users/" + mCurrentUser.getUid() + "/groups/" + currentDate +"/balance/amount", 0 );
+                    memberMap.put("Users/" + mCurrentUser.getUid() + "/groups/" + currentDate +"/balance/borrower", "none" );
+
+                    memberMap.put("Users/" + mCurrentUser.getUid() + "/groups/" + currentDate +"/role", "creator" );
+                    memberMap.put("Users/" + mCurrentUser.getUid() + "/groups/" + currentDate + "/image", "default");
+                    memberMap.put("Users/" + mCurrentUser.getUid() + "/groups/" + currentDate + "/thumb_image", "default");
+                    memberMap.put("Users/" + mCurrentUser.getUid() + "/groups/" + currentDate + "/name", mGroupName.getText().toString());
 
 
+                    progressDialog = new ProgressDialog(AddGroupName.this);
+                    progressDialog.setTitle("Updating image");
+                    progressDialog.setMessage("Creating group.");
+                    progressDialog.setCanceledOnTouchOutside(false);
+                    progressDialog.show();
                     mDatabaseRef.updateChildren(memberMap, new DatabaseReference.CompletionListener() {
                         @Override
                         public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
@@ -79,6 +93,11 @@ public class AddGroupName extends AppCompatActivity {
                             else{
 
                                 Toast.makeText(AddGroupName.this, "Group created", Toast.LENGTH_LONG).show();
+                                progressDialog.dismiss();
+                                Intent intent = new Intent(AddGroupName.this, AddGroupImage.class);
+                                intent.putExtra("group_name", currentDate);
+                                startActivity(intent);
+                                finish();
                             }
 
 
@@ -86,10 +105,7 @@ public class AddGroupName extends AppCompatActivity {
                     });
 
 
-                    Intent intent = new Intent(AddGroupName.this, AddGroupImage.class);
-                    intent.putExtra("group_name", mGroupName.getText().toString());
-                    startActivity(intent);
-                    finish();
+
                 }
             }
         });

@@ -112,6 +112,9 @@ public class SettleUp extends AppCompatActivity {
                 settleUpMap.put("Friends/" + mCurrentUserId + "/" + user_id + "/bills/" + date + "/description", "settle_up");
                 settleUpMap.put("Friends/" + user_id + "/" + mCurrentUserId + "/bills/" + date + "/description", "settle_up");
 
+                settleUpMap.put("Friends/" + mCurrentUserId + "/" + user_id + "/bills/" + date + "/splitting_type", "settle_up");
+                settleUpMap.put("Friends/" + user_id + "/" + mCurrentUserId + "/bills/" + date + "/splitting_type", "settle_up");
+
 
                 mDatabase.updateChildren(settleUpMap, new DatabaseReference.CompletionListener() {
                     @Override

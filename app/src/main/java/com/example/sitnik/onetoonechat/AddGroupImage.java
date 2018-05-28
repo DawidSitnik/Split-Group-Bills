@@ -51,7 +51,7 @@ public class AddGroupImage extends AppCompatActivity {
 
     private CircleImageView mButtonImage;
 
-    private String group_name;
+    private String group_name, name_display;
 
     private ProgressDialog progressDialog;
 
@@ -84,7 +84,8 @@ public class AddGroupImage extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(AddGroupImage.this, CreateGroupActivity.class);
-                intent.putExtra("group_name", group_name);
+                intent.putExtra("group_date", group_name);
+                intent.putExtra("name_display", name_display);
                 startActivity(intent);
                 finish();
 
@@ -108,6 +109,7 @@ public class AddGroupImage extends AppCompatActivity {
 
                 final String image = dataSnapshot.child("image").getValue().toString();
                 String thumb = dataSnapshot.child("thumb_image").getValue().toString();
+                name_display = dataSnapshot.child("name").getValue().toString();
 
 
                 if(!image.equals("default")){
