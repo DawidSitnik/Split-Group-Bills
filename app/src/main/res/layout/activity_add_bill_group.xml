@@ -152,7 +152,7 @@
         <Button
             android:id="@+id/addBillGroup_splittingType"
             style="@android:style/Widget.Button.Small"
-            android:layout_width="53dp"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:background="@color/common_google_signin_btn_text_dark_default"
             android:text="equally"

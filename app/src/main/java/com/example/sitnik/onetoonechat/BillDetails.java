@@ -67,41 +67,45 @@ public class BillDetails extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                balance = dataSnapshot.child("Friends").child(mCurrentUserId).child(user_id).child("balance").getValue().toString();
-                borrower = dataSnapshot.child("Friends").child(mCurrentUserId).child(user_id).child("borrower").getValue().toString();
-                billDescription = dataSnapshot.child("Friends").child(mCurrentUserId).child(user_id).child("bills").child(bill_date).child("description").getValue().toString();
-                billPayedBy = dataSnapshot.child("Friends").child(mCurrentUserId).child(user_id).child("bills").child(bill_date).child("payed_by").getValue().toString();
-                billAmount = dataSnapshot.child("Friends").child(mCurrentUserId).child(user_id).child("bills").child(bill_date).child("amount").getValue().toString();
+                    balance = dataSnapshot.child("Friends").child(mCurrentUserId).child(user_id).child("balance").getValue().toString();
+                    borrower = dataSnapshot.child("Friends").child(mCurrentUserId).child(user_id).child("borrower").getValue().toString();
 
-                if(splitting_type.equals("you_owe_the_full_amount") || splitting_type.equals("they_owe_the_full_amount")){
-                    billAmount2 = Double.parseDouble(billAmount);
-                }else{
-                    billAmount2 = Double.parseDouble(billAmount) / 2;
-                }
-                friendName = dataSnapshot.child("Users").child(user_id).child("name").getValue().toString();
-                yourName = dataSnapshot.child("Users").child(mCurrentUserId).child("name").getValue().toString();
+                    if (dataSnapshot.child("Friends").child(mCurrentUserId).child(user_id).child("bills").child(bill_date).exists())
+                    {
+                    billDescription = dataSnapshot.child("Friends").child(mCurrentUserId).child(user_id).child("bills").child(bill_date).child("description").getValue().toString();
+                    billPayedBy = dataSnapshot.child("Friends").child(mCurrentUserId).child(user_id).child("bills").child(bill_date).child("payed_by").getValue().toString();
+                    billAmount = dataSnapshot.child("Friends").child(mCurrentUserId).child(user_id).child("bills").child(bill_date).child("amount").getValue().toString();
 
-                if(billDescription.equals("settle_up")){
-                    mImage.setImageResource(R.drawable.settle_up);
-                }
-                if(!billDescription.equals("settle_up")){
-                    mImage.setImageResource(R.drawable.bill);
-                }
+                    if (splitting_type.equals("you_owe_the_full_amount") || splitting_type.equals("they_owe_the_full_amount")) {
+                        billAmount2 = Double.parseDouble(billAmount);
+                    } else {
+                        billAmount2 = Double.parseDouble(billAmount) / 2;
+                    }
+                    friendName = dataSnapshot.child("Users").child(user_id).child("name").getValue().toString();
+                    yourName = dataSnapshot.child("Users").child(mCurrentUserId).child("name").getValue().toString();
 
-                if(billPayedBy.equals("me")){
-                    detail1 = yourName + " paid " + billAmount +"zl and owes " +billAmount2 + "zl";
-                    detail2 = friendName + " owes " + billAmount2 + "zl";
-                }
-                if(billPayedBy.equals("friend")){
-                    detail1 = friendName + " paid " + billAmount +"zl and owes " +billAmount2 + "zl";
-                    detail2 = yourName + " owes " + billAmount2 + "zl";
-                }
+                    if (billDescription.equals("settle_up")) {
+                        mImage.setImageResource(R.drawable.settle_up);
+                    }
+                    if (!billDescription.equals("settle_up")) {
+                        mImage.setImageResource(R.drawable.bill);
+                    }
 
-                mDetail1.setText(detail1);
-                mDetail2.setText(detail2);
-                mDescription.setText(billDescription);
-                mAmount.setText(billAmount+"zl");
-                mDate.setText(bill_date);
+                    if (billPayedBy.equals("me")) {
+                        detail1 = yourName + " paid " + billAmount + "zl and owes " + billAmount2 + "zl";
+                        detail2 = friendName + " owes " + billAmount2 + "zl";
+                    }
+                    if (billPayedBy.equals("friend")) {
+                        detail1 = friendName + " paid " + billAmount + "zl and owes " + billAmount2 + "zl";
+                        detail2 = yourName + " owes " + billAmount2 + "zl";
+                    }
+
+                    mDetail1.setText(detail1);
+                    mDetail2.setText(detail2);
+                    mDescription.setText(billDescription);
+                    mAmount.setText(billAmount + "zl");
+                    mDate.setText(bill_date);
+                }
             }
 
             @Override

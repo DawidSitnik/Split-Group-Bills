@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
@@ -88,6 +89,7 @@ public class PopOutPaidBy extends AppCompatActivity {
         mButtonOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 finish();
             }
         });
@@ -141,9 +143,26 @@ public class PopOutPaidBy extends AppCompatActivity {
                 memberViewHolder.mView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        AddBillGroup.addToHashMap("Groups/" + group_date + "/bills/" + bill_date + "/paid_by" , list_member_id);
+                        hashMap.put("Groups/" + group_date + "/bills/" + bill_date + "/paid_by" , list_member_id);
                         AddBillGroup.mPaidBy.setText(memberViewHolder.getName());
-                        finish();
+
+                        mDatabaseRef.updateChildren(hashMap, new DatabaseReference.CompletionListener() {
+                            @Override
+                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+
+                                if (databaseError != null) {
+                                    String error = databaseError.getMessage();
+                                    Toast.makeText(PopOutPaidBy.this, error, Toast.LENGTH_LONG);
+                                } else {
+
+                                    Toast.makeText(PopOutPaidBy.this, "Paid by added.", Toast.LENGTH_LONG).show();
+                                    finish();
+                                }
+
+
+                            }
+                        });
+
                     }
                 });
 

@@ -173,33 +173,33 @@ public class ShareWithFriend extends AppCompatActivity {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
 
+                    if (dataSnapshot.exists()) {
                         String billDescription = dataSnapshot.child("description").getValue().toString();
                         billPayedBy = dataSnapshot.child("payed_by").getValue().toString();
                         billAmount = dataSnapshot.child("amount").getValue().toString();
                         splitting_type = dataSnapshot.child("splitting_type").getValue().toString();
 
-                        if(splitting_type.equals("you_owe_the_full_amount") || splitting_type.equals("they_owe_the_full_amount")){
+                        if (splitting_type.equals("you_owe_the_full_amount") || splitting_type.equals("they_owe_the_full_amount")) {
                             billAmount2 = Double.parseDouble(billAmount);
-                        }else{
+                        } else {
                             billAmount2 = Double.parseDouble(billAmount) / 2;
-                        }
-
-
+                                }
 
 
                         billsViewHolder.setWhoOws();
 
-                        if(billDescription.equals("settle_up")){
+                        if (billDescription.equals("settle_up")) {
                             billsViewHolder.setWhoLendEmpty();
                             billsViewHolder.setDescription("Settle Up");
                             billsViewHolder.setSettleUpImage();
-                        }
+                            }
 
-                        if(!billDescription.equals("settle_up")){
+                        if (!billDescription.equals("settle_up")) {
 
                             billsViewHolder.setWhoLend();
                             billsViewHolder.setDescription(billDescription);
                             billsViewHolder.setDefaultImage();
+                            }
                         }
                     }
 

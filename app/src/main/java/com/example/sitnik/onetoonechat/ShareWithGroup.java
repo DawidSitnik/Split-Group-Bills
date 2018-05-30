@@ -13,10 +13,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -29,15 +31,16 @@ import com.squareup.picasso.Picasso;
 
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ShareWithGroup extends AppCompatActivity {
 
+    /*** Layout**/
     private Toolbar mToolbar;
-
     private RecyclerView mBillsList;
-
     private FloatingActionButton mAddBill;
     private Button mSettleUp;
     private CircleImageView mProfileImage;
@@ -45,24 +48,22 @@ public class ShareWithGroup extends AppCompatActivity {
     private TextView mName;
     private TextView mAmount;
 
+    /*** Database**/
     private DatabaseReference mDatabase;
-
     private FirebaseAuth mAuth;
     private String mCurrentUserId;
 
-    private Query query;
+    private Query query; /*** querry to fill list of bills**/
 
-    private double billAmount2;
-    private String who_ows;
-    private String billWhoOws;
-    private String billWhoLend;
-    private String billPayedBy;
-    private String billAmount;
-    private String yourBalance;
-    private String name;
-    private String borrower;
+
+    private String billPayedBy; /*** id of user who paid the bill**/
+    private String billPayedByName; /*** name of user who paid the bill**/
+    public static String billAmount; /*** amount of bill, value passed to GroupBillViewHolder**/
+    private String yourBalance; /*** Users payoff with the group**/
+    private String name; /*** name of the group**/
     private String splitting_type;
-    private String bill_date;
+    private String bill_date; /*** date of single bill creation**/
+    private String billUserAmount; /*** amount that current user paid**/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +83,9 @@ public class ShareWithGroup extends AppCompatActivity {
         mName = findViewById(R.id.shareGroup_name);
 
         bill_date = DateFormat.getDateTimeInstance().format(new Date());
+        billPayedBy = "";
+        billUserAmount = "0";
+
 
         mAuth = FirebaseAuth.getInstance();
         mCurrentUserId = mAuth.getCurrentUser().getUid();
@@ -92,7 +96,9 @@ public class ShareWithGroup extends AppCompatActivity {
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
-        final String group_id = getIntent().getStringExtra("group_id");
+        final HashMap hashMap = new HashMap(); /*** hash map to update database with default bill data**/
+
+        final String group_id = getIntent().getStringExtra("group_id"); /*** group creation date**/
 
 
         //SETTLE UP LISTENER
@@ -106,34 +112,22 @@ public class ShareWithGroup extends AppCompatActivity {
             }
         });
 
-        //FILLING FRIEND INFO
+        //GROUP
         mDatabase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 yourBalance = dataSnapshot.child("Users").child(mCurrentUserId).child("groups").child(group_id).child("balance").child("amount").getValue().toString();
-                borrower = dataSnapshot.child("Users").child(mCurrentUserId).child("groups").child(group_id).child("balance").child("borrower").getValue().toString();
                 name = dataSnapshot.child("Groups").child(group_id).child("name").getValue().toString();
                 String thumb_image = dataSnapshot.child("Groups").child(group_id).child("thumb_image").getValue().toString();
-//                String amount = dataSnapshot.child("Friends").child(mCurrentUserId).child(group_id).child("balance").getValue().toString();
-//                balance = dataSnapshot.child("Groups").child(group_id).child("balance").getValue().toString();
-//                borrower = dataSnapshot.child("Friends").child(mCurrentUserId).child(group_id).child("borrower").getValue().toString();
-//                String friend_name = dataSnapshot.child("Users").child(group_id).child("name").getValue().toString();
 
+                for (DataSnapshot addressSnapshot: dataSnapshot.child("Groups").child(group_id).child("members").getChildren()) {
+
+                    hashMap.put("Groups/" + group_id + "/bills/" + bill_date + "/split_with/" + addressSnapshot.getKey(), "");
+
+                }
                 mName.setText(name);
                 mAmount.setText(yourBalance + " zl");
-
-//                if(borrower.equals("me")){
-//                    who_ows = "You owe " + friend_name;
-//                    mAmount.setTextColor(Color.parseColor("#FF5521"));
-//                }
-//                if(borrower.equals("friend")){
-//                    who_ows = friend_name + " ows you";
-//                    mAmount.setTextColor(Color.parseColor("#00ff00"));
-//                }
-//
-//                mWhoOwes.setText(who_ows);
-
                 Picasso.get().load(thumb_image).placeholder(R.drawable.default_avatar).into(mProfileImage);
 
             }
@@ -146,161 +140,118 @@ public class ShareWithGroup extends AppCompatActivity {
 
         mAddBill.setOnClickListener(new View.OnClickListener() {
             @Override
+            /*** Default bill to database adding. **/
             public void onClick(View v) {
 
-
-
-                Intent intent = new Intent(ShareWithGroup.this, AddBillGroup.class);
+                final Intent intent = new Intent(ShareWithGroup.this, AddBillGroup.class);
                 intent.putExtra("group_name_display", name);
                 intent.putExtra("group_id", group_id);
                 intent.putExtra("bill_date", bill_date);
-                startActivity(intent);
 
+                hashMap.put("Groups/" + group_id + "/bills/" + bill_date + "/splitting_type", "equally");
+                hashMap.put("Groups/" + group_id + "/bills/" + bill_date + "/paid_by", mCurrentUserId);
+                hashMap.put("Groups/" + group_id + "/bills/" + bill_date + "/description", "default");
+                hashMap.put("Groups/" + group_id + "/bills/" + bill_date + "/amount", 0);
+
+                mDatabase.updateChildren(hashMap, new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+
+                        if (databaseError != null) {
+                            String error = databaseError.getMessage();
+                            Toast.makeText(getApplicationContext(), error, Toast.LENGTH_LONG);
+                        } else {
+
+                            Toast.makeText(getApplicationContext(), "Starting bill.", Toast.LENGTH_LONG).show();
+                            startActivity(intent);
+                            finish();
+                        }
+                    }
+                });
             }
         });
 
 
         //BILLS LIST
-//        query = FirebaseDatabase.getInstance().getReference().child("Friends").child(mCurrentUserId).child(group_id).child("bills");
-//
-//        FirebaseRecyclerOptions<Friends> options =
-//                new FirebaseRecyclerOptions.Builder<Friends>()
-//                        .setQuery(query, Friends.class)
-//                        .setLifecycleOwner(this)
-//                        .build();
-//
-//
-//        FirebaseRecyclerAdapter<Friends, BillsViewHolder> adapter = new FirebaseRecyclerAdapter<Friends, BillsViewHolder>(options) {
-//            @Override
-//            public BillsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-//
-//                return new BillsViewHolder(LayoutInflater.from(parent.getContext())
-//                        .inflate(R.layout.bill_single_layout, parent, false));
-//            }
-//
-//            @Override
-//            protected void onBindViewHolder(final BillsViewHolder billsViewHolder, int position, final Friends friends) {
-//
-//                final String list_user_id = getRef(position).getKey();
-//
-//
-//                mDatabase.child("Friends").child(mCurrentUserId).child(group_id).child("bills").child(list_user_id).addValueEventListener(new ValueEventListener() {
-//                    @Override
-//                    public void onDataChange(DataSnapshot dataSnapshot) {
-//
-//                        String billDescription = dataSnapshot.child("description").getValue().toString();
-//                        billPayedBy = dataSnapshot.child("payed_by").getValue().toString();
-//                        billAmount = dataSnapshot.child("amount").getValue().toString();
-//                        splitting_type = dataSnapshot.child("splitting_type").getValue().toString();
-//
-//                        if(splitting_type.equals("you_owe_the_full_amount") || splitting_type.equals("they_owe_the_full_amount")){
-//                            billAmount2 = Double.parseDouble(billAmount);
-//                        }else{
-//                            billAmount2 = Double.parseDouble(billAmount) / 2;
-//                        }
-//
-//
-//
-//
-//                        billsViewHolder.setWhoOws();
-//
-//                        if(billDescription.equals("settle_up")){
-//                            billsViewHolder.setWhoLendEmpty();
-//                            billsViewHolder.setDescription("Settle Up");
-//                            billsViewHolder.setSettleUpImage();
-//                        }
-//
-//                        if(!billDescription.equals("settle_up")){
-//
-//                            billsViewHolder.setWhoLend();
-//                            billsViewHolder.setDescription(billDescription);
-//                            billsViewHolder.setDefaultImage();
-//                        }
-//                    }
-//
-//                    @Override
-//                    public void onCancelled(DatabaseError databaseError) {
-//
-//                    }
-//                });
-//
-//                billsViewHolder.mView.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//
+        /**
+         * Preparing view holder for bills list
+         */
+        query = FirebaseDatabase.getInstance().getReference().child("Groups").child(group_id).child("bills");
+
+        FirebaseRecyclerOptions<Friends> options =
+                new FirebaseRecyclerOptions.Builder<Friends>()
+                        .setQuery(query, Friends.class)
+                        .setLifecycleOwner(this)
+                        .build();
+
+
+        FirebaseRecyclerAdapter<Friends, GroupBillViewHolder> adapter = new FirebaseRecyclerAdapter<Friends, GroupBillViewHolder>(options) {
+            @Override
+            public GroupBillViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+                return new GroupBillViewHolder(LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.bill_single_layout, parent, false));
+            }
+
+            @Override
+            protected void onBindViewHolder(final GroupBillViewHolder billsViewHolder, int position, final Friends friends) {
+
+                final String list_bill_date = getRef(position).getKey();
+
+
+                mDatabase.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+
+                        if(dataSnapshot.child("Groups").child(group_id).child("bills").child(list_bill_date).exists() ) {
+                            String billDescription = dataSnapshot.child("Groups").child(group_id).child("bills").child(list_bill_date).child("description").getValue().toString();
+                            billPayedBy = dataSnapshot.child("Groups").child(group_id).child("bills").child(list_bill_date).child("paid_by").getValue().toString();
+                            billAmount = dataSnapshot.child("Groups").child(group_id).child("bills").child(list_bill_date).child("amount").getValue().toString();
+                            splitting_type = dataSnapshot.child("Groups").child(group_id).child("bills").child(list_bill_date).child("splitting_type").getValue().toString();
+                            billUserAmount = dataSnapshot.child("Groups").child(group_id).child("bills").child(list_bill_date).child("split_with").child(mCurrentUserId).getValue().toString();
+                            billPayedByName = dataSnapshot.child("Users").child(billPayedBy).child("name").getValue().toString();
+
+                            billsViewHolder.setWhoPaid(billPayedByName);
+                            billsViewHolder.setYourPayoff(billUserAmount);
+                            billsViewHolder.setDescription(billDescription);
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+                billsViewHolder.mView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
 //                        Intent intent = new Intent (ShareWithFriend.this, BillDetails.class);
-//                        intent.putExtra("bill_date", list_user_id);
+//                        intent.putExtra("bill_date", list_bill_date);
 //                        intent.putExtra("user_id", group_id);
 //                        intent.putExtra("splitting_type", splitting_type);
 //                        startActivity(intent);
-//
-//                    }
-//                });
-//            }
-//        };
-//
-//        mBillsList.setAdapter(adapter);
+
+                    }
+                });
+            }
+        };
+
+        mBillsList.setAdapter(adapter);
 
     }
 
-    public class BillsViewHolder extends RecyclerView.ViewHolder{
-
-        View mView;
-
-        public BillsViewHolder(View itemView){
-            super(itemView);
-            mView = itemView;
-        }
-
-        public void setDescription(String description){
-            TextView singleDescription = mView.findViewById(R.id.bill_single_description);
-            singleDescription.setText(description);
-        }
-
-        public void setWhoOws (){
-
-            TextView singleWhoOws = mView.findViewById(R.id.bill_single_ows);
-
-            if(billPayedBy.equals("me")){
-                billWhoOws = "You paid "+billAmount + "zl";
-            }
-            if(billPayedBy.equals("friend")){
-                billWhoOws = "Your friend paid "+billAmount + "zl";
-            }
-
-            singleWhoOws.setText(billWhoOws);
-        }
-
-        public void setWhoLend(){
-
-            TextView singleWhoLend = mView.findViewById(R.id.single_bill_whoLend);
-
-            if(billPayedBy.equals("me")){
-                billWhoLend = "You lent " + billAmount2 + "zl";
-                singleWhoLend.setTextColor(Color.parseColor("#00FF00"));
-            }
-            if(billPayedBy.equals("friend")){
-                billWhoLend = "You borrowed " + billAmount2 + "zl" ;
-                singleWhoLend.setTextColor(Color.parseColor("#FF5521"));
-            }
-            singleWhoLend.setText(billWhoLend);
-        }
-
-        public void setSettleUpImage(){
-            CircleImageView mImage = mView.findViewById(R.id.bill_single_image);
-            mImage.setImageResource(R.drawable.settle_up);
-        }
-
-        public void setDefaultImage() {
-            CircleImageView mImage = mView.findViewById(R.id.bill_single_image);
-            mImage.setImageResource(R.drawable.bill);
-        }
-
-        public void setWhoLendEmpty(){
-            TextView singleWhoLend = mView.findViewById(R.id.single_bill_whoLend);
-            singleWhoLend.setText("");
-        }
+    /**
+     * Updating database after adding bill
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mDatabase.updateChildren(AddBillGroup.splitEquallyMap);
     }
+
 
 
 }

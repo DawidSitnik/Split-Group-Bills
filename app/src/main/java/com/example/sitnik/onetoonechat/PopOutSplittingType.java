@@ -63,7 +63,6 @@ public class PopOutSplittingType extends AppCompatActivity {
     private String bill_date;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,7 +74,7 @@ public class PopOutSplittingType extends AppCompatActivity {
         int width = dm.widthPixels;
         int height = dm.heightPixels;
 
-        getWindow().setLayout((int)(width*0.8), (int)(height*0.6));
+        getWindow().setLayout((int) (width * 0.8), (int) (height * 0.6));
 
         mButtonOk = findViewById(R.id.popOut_button);
         mSpinner = findViewById(R.id.popOut_splittingType);
@@ -96,7 +95,7 @@ public class PopOutSplittingType extends AppCompatActivity {
         query = FirebaseDatabase.getInstance().getReference().child("Groups").child(group_date).child("members");
 
         ArrayAdapter<String> spinnerAapter = new ArrayAdapter<String>(PopOutSplittingType.this,
-                android.R.layout.simple_spinner_item,paths);
+                android.R.layout.simple_spinner_item, paths);
 
         spinnerAapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mSpinner.setAdapter(spinnerAapter);
@@ -107,18 +106,23 @@ public class PopOutSplittingType extends AppCompatActivity {
                 switch (position) {
                     case 0:
                         hashMap.put("Groups/" + group_date + "/bills/" + bill_date + "/splitting_type", "equally");
+                        splitting_type = "equally";
                         break;
                     case 1:
                         hashMap.put("Groups/" + group_date + "/bills/" + bill_date + "/splitting_type", "unequally");
+                        splitting_type = "unequally";
                         break;
                     case 2:
                         hashMap.put("Groups/" + group_date + "/bills/" + bill_date + "/splitting_type", "by_percentages");
+                        splitting_type = "by percentages";
                         break;
                     case 3:
                         hashMap.put("Groups/" + group_date + "/bills/" + bill_date + "/splitting_type", "by_shares");
+                        splitting_type = "by shares";
                         break;
                     case 4:
                         hashMap.put("Groups/" + group_date + "/bills/" + bill_date + "/splitting_type", "by_adjustment");
+                        splitting_type = "by adjustment";
                         break;
                 }
             }
@@ -136,29 +140,32 @@ public class PopOutSplittingType extends AppCompatActivity {
 
         mButtonOk.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) { // pamietac zeby putExtra bill_date + odebrac to w nastepnej activity
-               //Intent intent = new Intent(PopOutSplittingType.this, AddBill.class);
-               //intent.putExtra("hash_map", (Serializable) hashMap);
-               //startActivity(intent);
-//                mDatabaseRef.updateChildren(hashMap, new DatabaseReference.CompletionListener() {
-//                    @Override
-//                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-//
-//                        if (databaseError != null) {
-//                            String error = databaseError.getMessage();
-//                            Toast.makeText(PopOutSplittingType.this, error, Toast.LENGTH_LONG);
-//                        } else {
-//                            Toast.makeText(PopOutSplittingType.this, "Splitters added", Toast.LENGTH_LONG).show();
-//                        }
-//                    }
-//                });
-               finish();
+            public void onClick(View v) {
+
+                mDatabaseRef.child("Groups").child(group_date).child("bills").child(bill_date).child("split_with").removeValue();
+                mDatabaseRef.updateChildren(hashMap, new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+
+                        if (databaseError != null) {
+                            String error = databaseError.getMessage();
+                            Toast.makeText(getApplicationContext(), error, Toast.LENGTH_LONG);
+                        } else {
+
+                            Toast.makeText(getApplicationContext(), "Bill added.", Toast.LENGTH_LONG).show();
+                            AddBillGroup.mSplittingType.setText(splitting_type);
+                            finish();
+                        }
+
+
+                    }
+                });
 
 
             }
         });
-
     }
+
 
     private void displayViewHolder(){
 
@@ -167,6 +174,7 @@ public class PopOutSplittingType extends AppCompatActivity {
                         .setQuery(query, Friends.class)
                         .setLifecycleOwner(this)
                         .build();
+
 
 
         FirebaseRecyclerAdapter<Friends,MemberViewHolder> adapter = new FirebaseRecyclerAdapter<Friends, MemberViewHolder>(options) {
@@ -188,9 +196,15 @@ public class PopOutSplittingType extends AppCompatActivity {
                     public void onClick(View v) {
 
                         if(checkBox.isChecked()){ //adds member to hash map is his field is checked
-                            AddBillGroup.addToHashMap("Groups/" + group_date + "/bills/" + bill_date + "/split_with/" + list_member_id, "");
+                            hashMap.put("Groups/" + group_date + "/bills/" + bill_date + "/split_with/" + list_member_id, "");
+                            if(AddBillGroup.payers_count == -1) AddBillGroup.payers_count = 1;
+                            else AddBillGroup.payers_count++;
                         } else{
-                            AddBillGroup.removeFromHashMap("Groups/" + group_date + "/bills/" + bill_date + "/split_with/" + list_member_id);
+                            hashMap.remove("Groups/" + group_date + "/bills/" + bill_date + "/split_with/" + list_member_id);
+                            if(AddBillGroup.payers_count > 0) {
+                                if (AddBillGroup.payers_count == 1) AddBillGroup.payers_count = -1;
+                                else AddBillGroup.payers_count--;
+                            }
                         }
                     }
                 });

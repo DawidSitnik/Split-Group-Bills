@@ -1,5 +1,6 @@
 package com.example.sitnik.onetoonechat;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
@@ -49,7 +50,9 @@ public class AddFriendToGroup extends AppCompatActivity {
 
     private CircleImageView mUserImage;
 
+    private String currentDate, group_image, group_thumb_image;
 
+    private ProgressDialog mAddingFriendProgress;
 
 
     @Override
@@ -58,6 +61,7 @@ public class AddFriendToGroup extends AppCompatActivity {
         setContentView(R.layout.activity_add_friend_to_group);
 
         final String group_date = getIntent().getStringExtra("group_date");
+        currentDate = DateFormat.getDateTimeInstance().format(new Date());
 
         mGroupName = findViewById(R.id.tv_group_name);
         mGroupName.setText(group_date);
@@ -74,6 +78,23 @@ public class AddFriendToGroup extends AppCompatActivity {
         mFriendsDatabase.keepSynced(true);
         mUsersDatabase = FirebaseDatabase.getInstance().getReference().child("Users");
         mUsersDatabase.keepSynced(true);
+
+        mAddingFriendProgress = new ProgressDialog(this);
+
+        mDatabaseRef.child("Groups").child(group_date).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                currentDate = DateFormat.getDateTimeInstance().format(new Date());
+                group_image = dataSnapshot.child("image").getValue().toString();
+                group_thumb_image = dataSnapshot.child("thumb_image").getValue().toString();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
         query = FirebaseDatabase.getInstance().getReference().child("Friends");
 
@@ -125,45 +146,36 @@ public class AddFriendToGroup extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
 
+                        mAddingFriendProgress.setTitle("Add Friend");
+                        mAddingFriendProgress.setMessage("Adding friend to the group");
+                        mAddingFriendProgress.setCanceledOnTouchOutside(false);
+                        mAddingFriendProgress.show();
+                        Map memberMap = new HashMap();
+                        memberMap.put("Groups/" + group_date + "/members/" + user_id + "/date", "aaa"  );
+                        memberMap.put("Users/"+ user_id + "/groups/" + group_date + "/role", "member");
+                        memberMap.put("Users/" + user_id + "/groups/" + group_date + "/image", group_image);
+                        memberMap.put("Users/" + user_id + "/groups/" + group_date + "/thumb_image", group_thumb_image);
+                        memberMap.put("Users/" + user_id + "/groups/" + group_date + "/balance/amount", 0);
+                        memberMap.put("Users/" + user_id + "/groups/" + group_date + "/balance/borrower", "none");
 
-                        mDatabaseRef.child("Groups").child(group_date).addValueEventListener(new ValueEventListener() {
+
+                        mDatabaseRef.updateChildren(memberMap, new DatabaseReference.CompletionListener() {
                             @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
+                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
 
-                                final String currentDate = DateFormat.getDateTimeInstance().format(new Date());
-                                String group_image = dataSnapshot.child("image").getValue().toString();
-                                String group_thumb_image = dataSnapshot.child("thumb_image").getValue().toString();
+                                if(databaseError != null){
+                                    String error = databaseError.getMessage();
+                                    Toast.makeText(AddFriendToGroup.this, error, Toast.LENGTH_LONG);
+                                    mAddingFriendProgress.hide();
+                                }
 
-                                Map memberMap = new HashMap();
-                                memberMap.put("Groups/" + group_date + "/members/" + user_id + "/date", currentDate  );
-                                memberMap.put("Users/"+ user_id + "/groups/" + group_date + "/role", "member");
-                                memberMap.put("Users/" + user_id + "/groups/" + group_date + "/image", group_image);
-                                memberMap.put("Users/" + user_id + "/groups/" + group_date + "/thumb_image", group_thumb_image);
+                                else{
 
+                                    Toast.makeText(AddFriendToGroup.this, "Friend added to group", Toast.LENGTH_LONG).show();
+                                    mAddingFriendProgress.dismiss();
+                                    finish();
+                                }
 
-                                mDatabaseRef.updateChildren(memberMap, new DatabaseReference.CompletionListener() {
-                                    @Override
-                                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-
-                                        if(databaseError != null){
-                                            String error = databaseError.getMessage();
-                                            Toast.makeText(AddFriendToGroup.this, error, Toast.LENGTH_LONG);
-                                        }
-
-                                        else{
-
-                                            Toast.makeText(AddFriendToGroup.this, "Friend added to group", Toast.LENGTH_LONG).show();
-                                        }
-
-
-                                    }
-                                });
-
-                                finish();
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
 
                             }
                         });

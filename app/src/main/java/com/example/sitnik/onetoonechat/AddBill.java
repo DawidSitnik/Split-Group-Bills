@@ -29,18 +29,18 @@ import java.util.Map;
 
 public class AddBill extends AppCompatActivity {
 
+    /***layout*/
     private Toolbar mToolbar;
-
     private EditText mDescription;
     private EditText mAmount;
-
     private Button mAdd;
 
+    /***database*/
     private DatabaseReference mDatabase;
-
     private FirebaseAuth mAuth;
     private String mCurrentUserId;
 
+    /***activity variables*/
     private String balance;
     private String borrower;
     private String amount;

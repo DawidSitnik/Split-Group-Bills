@@ -10,6 +10,10 @@ import com.google.firebase.messaging.RemoteMessage;
 
 
 //tutaj w NotificationCompat mozemy zmienic obrazek powiadomienia
+
+/**
+ *
+ */
 public class MessageService extends FirebaseMessagingService {
 
     @Override

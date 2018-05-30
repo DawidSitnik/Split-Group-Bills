@@ -45,6 +45,7 @@
         android:layout_height="26dp"
         android:layout_marginEnd="45dp"
         android:layout_marginRight="45dp"
+        android:checked="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/single_member_name"

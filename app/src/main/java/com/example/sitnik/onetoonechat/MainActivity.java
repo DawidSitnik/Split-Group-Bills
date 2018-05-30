@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
 
             mainToolbar = findViewById(R.id.main_page_toolbar);
             setSupportActionBar(mainToolbar);
-            getSupportActionBar().setTitle("Talk to Sitnik");
+            getSupportActionBar().setTitle("Talk Dirty to Sitnik");
 
 
     }
