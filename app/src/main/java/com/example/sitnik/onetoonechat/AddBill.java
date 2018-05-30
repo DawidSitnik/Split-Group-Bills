@@ -40,7 +40,7 @@ public class AddBill extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private String mCurrentUserId;
 
-    /***activity variables*/
+    /***activity variable*/
     private String balance;
     private String borrower;
     private String amount;
