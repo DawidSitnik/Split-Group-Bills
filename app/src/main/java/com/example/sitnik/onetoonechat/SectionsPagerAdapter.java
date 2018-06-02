@@ -5,6 +5,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
+/***adapter to cards in main leyout*/
 class SectionsPagerAdapter extends FragmentPagerAdapter {
 
     public SectionsPagerAdapter(FragmentManager fm) {

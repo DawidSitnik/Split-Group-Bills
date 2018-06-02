@@ -7,11 +7,9 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -23,32 +21,24 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.squareup.picasso.Picasso;
 
-import de.hdodenhof.circleimageview.CircleImageView;
-
-
+/***filling groups list with users groups.*/
 public class GroupsFragment extends Fragment {
 
+    /***layout*/
     private RecyclerView mFriendList;
-
     private FloatingActionButton mAddFriendButton;
-
     private View mMainView;
 
-    private DatabaseReference mFriendsDatabase;
+    /***database*/
     private DatabaseReference mUsersDatabase;
-    private DatabaseReference mDatabase;
-
     private FirebaseAuth mAuth;
-
     private String mCurrentUserId;
 
     private Query query;
 
-    public GroupsFragment() {
-        // Required empty public constructor
-    }
+    /***required empty constructor*/
+    public GroupsFragment() {}
 
 
     @Override
@@ -73,11 +63,7 @@ public class GroupsFragment extends Fragment {
         mAuth = FirebaseAuth.getInstance();
         mCurrentUserId = mAuth.getCurrentUser().getUid();
 
-        mFriendsDatabase = FirebaseDatabase.getInstance().getReference().child("Users").child(mCurrentUserId).child("groups");
-        mFriendsDatabase.keepSynced(true);
         mUsersDatabase = FirebaseDatabase.getInstance().getReference().child("Users");
-        mUsersDatabase.keepSynced(true);
-        mDatabase = FirebaseDatabase.getInstance().getReference();
 
         query = FirebaseDatabase.getInstance().getReference().child("Users").child(mCurrentUserId).child("groups");
 
@@ -88,17 +74,17 @@ public class GroupsFragment extends Fragment {
                         .build();
 
 
-        FirebaseRecyclerAdapter<Friends, FriendsFragment.FriendsViewHolder> adapter = new FirebaseRecyclerAdapter<Friends, FriendsFragment.FriendsViewHolder>(options) {
+        FirebaseRecyclerAdapter<Friends, FriendsViewHolder> adapter = new FirebaseRecyclerAdapter<Friends, FriendsViewHolder>(options) {
             @Override
-            public FriendsFragment.FriendsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-                // Create a new instance of the ViewHolder, in this case we are using a custom
-                // layout called R.layout.message for each item
-                return new FriendsFragment.FriendsViewHolder(LayoutInflater.from(parent.getContext())
+            public FriendsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+                return new FriendsViewHolder(LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.users_single_layout, parent, false));
             }
 
             @Override
-            protected void onBindViewHolder(final FriendsFragment.FriendsViewHolder friendsViewHolder, int position, final Friends friends) {
+            /***taking data from database and filling view holder*/
+            protected void onBindViewHolder(final FriendsViewHolder friendsViewHolder, int position, final Friends friends) {
 
                 final String group_id = getRef(position).getKey();
 
@@ -114,7 +100,7 @@ public class GroupsFragment extends Fragment {
                     mUsersDatabase.child(mCurrentUserId).child("groups").child(group_id).addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
-                          //  String groupName = dataSnapshot.getKey().toString();
+
                             String groupName = dataSnapshot.child("name").getValue().toString();
                             String groupThumbImage = dataSnapshot.child("thumb_image").getValue().toString();
 
@@ -143,43 +129,9 @@ public class GroupsFragment extends Fragment {
             }
         };
 
-
         mFriendList.setAdapter(adapter);
 
         return mMainView;
     }
-
-
-
-    public static class FriendsViewHolder extends RecyclerView.ViewHolder{
-
-        View mView;
-
-        public FriendsViewHolder(View itemView){
-            super(itemView);
-            mView = itemView;
-        }
-
-
-        public void setName(String name){
-            TextView userNameView = mView.findViewById(R.id.single_user_name);
-            userNameView.setText(name);
-        }
-
-        public void setStatus(String status){
-            TextView userStatusView = mView.findViewById(R.id.single_user_status);
-            userStatusView.setText(status);
-        }
-
-        public void setThumbImage(String thumb_image){
-            CircleImageView userImageView = mView.findViewById(R.id.user_single_image);
-            Picasso.get().load(thumb_image).placeholder(R.drawable.default_avatar).into(userImageView);
-        }
-
-
-
-    }
-
-
 
 }

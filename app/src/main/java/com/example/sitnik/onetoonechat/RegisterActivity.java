@@ -25,39 +25,34 @@ import java.util.HashMap;
 
 public class RegisterActivity extends AppCompatActivity {
 
+    /***layout*/
     private EditText name;
     private EditText password;
     private EditText email;
     private Button registerButton;
-
     private Toolbar registerToolbar;
 
-    private ProgressDialog registerProgress;
-
-    //Firebase Auth
+    /***database*/
     private FirebaseAuth mAuth;
-
-    //FirebaseDatabase
     private DatabaseReference database;
 
+    /***other*/
+    private ProgressDialog registerProgress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        //Firebase Auth
         mAuth = FirebaseAuth.getInstance();
 
         registerProgress = new ProgressDialog(this);
 
-        //Registration Fields
         name = findViewById(R.id.tv_name_settings);
         email = findViewById(R.id.et_email);
         password = findViewById(R.id.et_password);
         registerButton = findViewById(R.id.btn_register);
 
-        //toolbar
         registerToolbar = findViewById(R.id.register_toolbar);
         setSupportActionBar(registerToolbar);
         getSupportActionBar().setTitle("Create Account");
@@ -65,6 +60,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         registerButton.setOnClickListener(new View.OnClickListener(){
             @Override
+            /***getting text from inputs and registering user*/
             public void onClick(View v) {
 
                 String displayName = name.getText().toString();
@@ -85,12 +81,11 @@ public class RegisterActivity extends AppCompatActivity {
                             Toast.LENGTH_LONG).show();
 
                 }
-
-
             }
         });
     }
 
+    /***updating database with user data*/
     private void registerUser(final String name, String email, String password){
 
         mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
@@ -126,9 +121,6 @@ public class RegisterActivity extends AppCompatActivity {
                             }
                         }
                     });
-
-
-
                 }
 
                 else {

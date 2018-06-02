@@ -1,8 +1,6 @@
 package com.example.sitnik.onetoonechat;
 
 import android.app.ProgressDialog;
-import android.content.Intent;
-import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -23,36 +21,34 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.squareup.picasso.Picasso;
 
-import java.text.DateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
+/*** Updates database with new group member and default data*/
 public class AddFriendToGroup extends AppCompatActivity {
 
+    /***layout */
     private RecyclerView mFriendList;
-
-    private DatabaseReference mFriendsDatabase;
-    private DatabaseReference mUsersDatabase;
-    private DatabaseReference mDatabaseRef;
-
-    private FirebaseAuth mAuth;
-
-    private String mCurrentUserId;
-
-    private Query query;
-
     private TextView mGroupName;
-
     private CircleImageView mUserImage;
 
-    private String currentDate, group_image, group_thumb_image;
+    /***database */
+    private DatabaseReference mFriendsDatabase; /***reference to friends database*/
+    private DatabaseReference mUsersDatabase; /***reference to users database */
+    private DatabaseReference mDatabaseRef; /***general reference to database*/
+    private FirebaseAuth mAuth; /***user authentication*/
 
-    private ProgressDialog mAddingFriendProgress;
+    private String mCurrentUserId; /***id of current user*/
+
+    private Query query; /***querry to populate FriendList*/
+
+    private String group_image; /***name of user image from database*/
+    private String group_thumb_image; /***name of user thumb image from databse*/
+
+    private ProgressDialog mAddingFriendProgress; /***loading dialog, starts after sending querry to db, closes after succesful querry sending*/
 
 
     @Override
@@ -60,8 +56,7 @@ public class AddFriendToGroup extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_friend_to_group);
 
-        final String group_date = getIntent().getStringExtra("group_date");
-        currentDate = DateFormat.getDateTimeInstance().format(new Date());
+        final String group_date = getIntent().getStringExtra("group_date"); /***date of group creation*/
 
         mGroupName = findViewById(R.id.tv_group_name);
         mGroupName.setText(group_date);
@@ -85,7 +80,6 @@ public class AddFriendToGroup extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                currentDate = DateFormat.getDateTimeInstance().format(new Date());
                 group_image = dataSnapshot.child("image").getValue().toString();
                 group_thumb_image = dataSnapshot.child("thumb_image").getValue().toString();
             }
@@ -104,18 +98,16 @@ public class AddFriendToGroup extends AppCompatActivity {
                         .setLifecycleOwner(this)
                         .build();
 
-
-        FirebaseRecyclerAdapter<Friends, FriendsFragment.FriendsViewHolder> adapter = new FirebaseRecyclerAdapter<Friends, FriendsFragment.FriendsViewHolder>(options) {
+        FirebaseRecyclerAdapter<Friends, FriendsViewHolder> adapter = new FirebaseRecyclerAdapter<Friends, FriendsViewHolder>(options) {
             @Override
-            public FriendsFragment.FriendsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-                // Create a new instance of the ViewHolder, in this case we are using a custom
-                // layout called R.layout.message for each item
-                return new FriendsFragment.FriendsViewHolder(LayoutInflater.from(parent.getContext())
+            public FriendsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+                return new FriendsViewHolder(LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.users_single_layout, parent, false));
             }
 
             @Override
-            protected void onBindViewHolder(final FriendsFragment.FriendsViewHolder friendsViewHolder, int position, final Friends friends) {
+            protected void onBindViewHolder(final FriendsViewHolder friendsViewHolder, int position, final Friends friends) {
 
                 final String list_user_id = getRef(position).getKey();
                 final String user_id = getRef(position).getKey();
@@ -158,7 +150,6 @@ public class AddFriendToGroup extends AppCompatActivity {
                         memberMap.put("Users/" + user_id + "/groups/" + group_date + "/balance/amount", 0);
                         memberMap.put("Users/" + user_id + "/groups/" + group_date + "/balance/borrower", "none");
 
-
                         mDatabaseRef.updateChildren(memberMap, new DatabaseReference.CompletionListener() {
                             @Override
                             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
@@ -175,52 +166,12 @@ public class AddFriendToGroup extends AppCompatActivity {
                                     mAddingFriendProgress.dismiss();
                                     finish();
                                 }
-
-
                             }
                         });
-
-
                     }
                 });
             }
         };
-
-
         mFriendList.setAdapter(adapter);
-
-
     }
-
-    public static class FriendsViewHolder extends RecyclerView.ViewHolder{
-
-        View mView;
-
-        public FriendsViewHolder(View itemView){
-            super(itemView);
-            mView = itemView;
-
-        }
-
-
-        public void setName(String name){
-            TextView userNameView = mView.findViewById(R.id.single_user_name);
-            userNameView.setText(name);
-
-        }
-
-        public void setStatus(String status){
-            TextView userStatusView = mView.findViewById(R.id.single_user_status);
-            userStatusView.setText(status);
-        }
-
-        public void setThumbImage(String thumb_image){
-            CircleImageView userImageView = mView.findViewById(R.id.user_single_image);
-            Picasso.get().load(thumb_image).placeholder(R.drawable.default_avatar).into(userImageView);
-        }
-
-
-
-    }
-
 }

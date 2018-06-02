@@ -8,6 +8,7 @@ import com.squareup.picasso.Picasso;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
+/***member view holder*/
 public class MemberViewHolder extends RecyclerView.ViewHolder{
 
     View mView;

@@ -9,56 +9,48 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import de.hdodenhof.circleimageview.CircleImageView;
-
+/***class activity starts after clicking on change paid by
+ * person while creating group bill*/
 public class PopOutPaidBy extends AppCompatActivity {
 
+    /***layout*/
     private Button mButtonOk;
-    private Spinner mSpinner;
     private RecyclerView mMembersList;
 
-    private DatabaseReference mDatabaseRef;
+    /***database*/
+    private DatabaseReference mDatabaseRef; /***general reference to database*/
 
-    private FirebaseAuth mAuth;
+    private Query query; /***querry to fill recycler view*/
 
-    private String mCurrentUserId;
+    /***other*/
+    private String group_date; /***date of group creation*/
+    private String user_name;/***user name*/
+    private String bill_date;/***date of bill creation*/
 
-    private Query query;
+    public Map hashMap = new HashMap(); /***hash map to update a database after changing paid by user*/
 
-    private static final String[]paths = {"Split equally", "Split unequally", "Split by percentages", "Split by shares", "Split by adjustment"};
 
-    private String splitting_type;
-
-    private String group_date, user_id, user_name;
-
-    public Map hashMap = new HashMap();
-
-    private String bill_date;
-
+    /***initializing variables*/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pop_out_paid_by);
 
+        //changing size of the window
         DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
 
@@ -69,9 +61,6 @@ public class PopOutPaidBy extends AppCompatActivity {
 
         mButtonOk = findViewById(R.id.popOutPaidBy_button);
 
-        mAuth = FirebaseAuth.getInstance();
-        mCurrentUserId = mAuth.getCurrentUser().getUid();
-
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
 
         mMembersList = findViewById(R.id.popOutPaidBy_list);
@@ -79,7 +68,6 @@ public class PopOutPaidBy extends AppCompatActivity {
         mMembersList.setLayoutManager(new LinearLayoutManager(this));
 
         group_date = getIntent().getStringExtra("group_date");
-
         bill_date = getIntent().getStringExtra("bill_date");
 
         query = FirebaseDatabase.getInstance().getReference().child("Groups").child(group_date).child("members");
@@ -88,6 +76,7 @@ public class PopOutPaidBy extends AppCompatActivity {
 
         mButtonOk.setOnClickListener(new View.OnClickListener() {
             @Override
+            /***just finish activity*/
             public void onClick(View v) {
 
                 finish();
@@ -97,6 +86,7 @@ public class PopOutPaidBy extends AppCompatActivity {
 
     }
 
+    /***populating view holder with group members*/
     private void displayViewHolder(){
 
         FirebaseRecyclerOptions<Friends> options =
@@ -142,6 +132,7 @@ public class PopOutPaidBy extends AppCompatActivity {
 
                 memberViewHolder.mView.setOnClickListener(new View.OnClickListener() {
                     @Override
+                    /***updating database after choosing new paid by person*/
                     public void onClick(View v) {
                         hashMap.put("Groups/" + group_date + "/bills/" + bill_date + "/paid_by" , list_member_id);
                         AddBillGroup.mPaidBy.setText(memberViewHolder.getName());

@@ -9,8 +9,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -40,24 +38,25 @@ import java.util.Map;
 import de.hdodenhof.circleimageview.CircleImageView;
 import id.zelory.compressor.Compressor;
 
-
+/*** class used to add group image ,while group creation. It's activity starts after adding group name. */
 public class AddGroupImage extends AppCompatActivity {
 
-    private DatabaseReference mDatabaseRef;
-    private StorageReference mStorageReference;
-    private DatabaseReference mGroupDatabaseReference;
+    /***database*/
+    private DatabaseReference mDatabaseRef;/***general database reference*/
+    private StorageReference mStorageReference; /***reference for uploading a photo*/
+    private DatabaseReference mGroupDatabaseReference; /***reference to particular grup*/
+    private FirebaseAuth mAuth;
+    private String mCurrentUserId; /***id of current user*/
 
+    /***layout*/
     private Button mSubmitImage;
-
     private CircleImageView mButtonImage;
 
-    private String group_name, name_display;
+    /***other*/
+    private String group_name;/***date of group creation*/
+    private String name_display; /***name of group*/
 
     private ProgressDialog progressDialog;
-
-    private FirebaseAuth mAuth;
-    private String mCurrentUserId;
-
 
     private static final int GALLERY_PICK = 1;
 
@@ -93,6 +92,7 @@ public class AddGroupImage extends AppCompatActivity {
         });
 
         mButtonImage.setOnClickListener(new View.OnClickListener() {
+            /***starting updating a photo*/
             @Override
             public void onClick(View v) {
 
@@ -107,19 +107,15 @@ public class AddGroupImage extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                final String image = dataSnapshot.child("image").getValue().toString();
-                String thumb = dataSnapshot.child("thumb_image").getValue().toString();
-                name_display = dataSnapshot.child("name").getValue().toString();
-
+                final String image = dataSnapshot.child("image").getValue().toString();/***user image*/
+                name_display = dataSnapshot.child("name").getValue().toString(); /***user name*/
 
                 if(!image.equals("default")){
 
                     Picasso.get().load(image).networkPolicy(NetworkPolicy.OFFLINE)
                             .placeholder(R.drawable.default_avatar).into(mButtonImage, new Callback() {
                         @Override
-                        public void onSuccess() {
-
-                        }
+                        public void onSuccess() { }
 
                         @Override
                         public void onError(Exception e) {
@@ -139,7 +135,7 @@ public class AddGroupImage extends AppCompatActivity {
         });
 
     }
-
+    /***updating new image and compressing it into thimb nail*/
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == GALLERY_PICK && resultCode == RESULT_OK){
@@ -172,6 +168,7 @@ public class AddGroupImage extends AppCompatActivity {
                 FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
                 String uid = currentUser.getUid();
 
+                /*** compressing image into thumb and updating database */
                 try {
 
                     Bitmap thumbnailImage = new Compressor(this)

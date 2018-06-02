@@ -21,47 +21,43 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
 
-
+/***class to log into user account*/
 public class LoginActivity extends AppCompatActivity {
 
+    /***layout*/
     private EditText password;
     private EditText email;
-
     private Button loginButton;
-
     private Toolbar loginToolbar;
 
-    private ProgressDialog loginProgress;
-
+    /***database*/
     private DatabaseReference mUsersDatabase;
-
-    //Firebase Auth
     private FirebaseAuth mAuth;
+
+    /***other*/
+    private ProgressDialog loginProgress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        //Firebase Auth
-        mAuth = FirebaseAuth.getInstance();
+        email = findViewById(R.id.et_email);
+        password = findViewById(R.id.et_password);
+        loginButton = findViewById(R.id.btn_login);
 
+        mAuth = FirebaseAuth.getInstance();
         mUsersDatabase = FirebaseDatabase.getInstance().getReference().child("Users");
 
         loginProgress = new ProgressDialog(this);
-
-        //toolbar
         loginToolbar = findViewById(R.id.register_toolbar);
         setSupportActionBar(loginToolbar);
         getSupportActionBar().setTitle("Create Account");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        email = findViewById(R.id.et_email);
-        password = findViewById(R.id.et_password);
-        loginButton = findViewById(R.id.btn_login);
-
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
+            /***getting values from input and trying to login*/
             public void onClick(View v) {
 
                 String displayEmail = email.getText().toString();
@@ -73,7 +69,7 @@ public class LoginActivity extends AppCompatActivity {
                     loginProgress.setCanceledOnTouchOutside(false);
                     loginProgress.show();
 
-                    loginUser(displayEmail, displayPassword);
+                    loginUser(displayEmail, displayPassword); //login function
                 }
             }
         });
@@ -83,6 +79,7 @@ public class LoginActivity extends AppCompatActivity {
     private void loginUser(String email, String password) {
         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
+            /***updating database with users device token id*/
             public void onComplete(@NonNull Task<AuthResult> task) {
 
                 if(task.isSuccessful()){
@@ -100,12 +97,8 @@ public class LoginActivity extends AppCompatActivity {
                             mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             startActivity(mainIntent);
                             finish();
-
                         }
                     });
-
-
-
                 }
 
                 else {

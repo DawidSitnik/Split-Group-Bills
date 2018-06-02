@@ -1,7 +1,6 @@
 package com.example.sitnik.onetoonechat;
 
 import android.content.Intent;
-import android.media.Image;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,7 +14,6 @@ import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.squareup.picasso.Picasso;
@@ -29,12 +27,11 @@ public class UsersActivity extends AppCompatActivity {
 
     private RecyclerView mRecyclerView;
 
-    private DatabaseReference databaseReference;
-
     private Query query;
 
 
     @Override
+    /***setting toolbar and recycler view*/
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_users);
@@ -44,8 +41,6 @@ public class UsersActivity extends AppCompatActivity {
         setSupportActionBar(mToolbar);
         getSupportActionBar().setTitle("All Users");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        databaseReference = FirebaseDatabase.getInstance().getReference().child("Users");
 
         mRecyclerView = findViewById(R.id.users_list);
         mRecyclerView.setHasFixedSize(true);
@@ -63,13 +58,12 @@ public class UsersActivity extends AppCompatActivity {
         FirebaseRecyclerAdapter <Users, UsersViewHolder> adapter = new FirebaseRecyclerAdapter<Users, UsersViewHolder>(options) {
             @Override
             public UsersViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-                // Create a new instance of the ViewHolder, in this case we are using a custom
-                // layout called R.layout.message for each item
                 return new UsersViewHolder(LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.users_single_layout, parent, false));
             }
 
             @Override
+            /***filling holder with information about single user from database*/
             protected void onBindViewHolder(UsersViewHolder usersViewHolder, int position, Users users) {
 
                 usersViewHolder.setName(users.getName());
@@ -93,13 +87,10 @@ public class UsersActivity extends AppCompatActivity {
                 });
             }
         };
-
-
         mRecyclerView.setAdapter(adapter);
-
-
     }
 
+    /***users view holder*/
     public static class UsersViewHolder extends RecyclerView.ViewHolder{
 
         View mView;

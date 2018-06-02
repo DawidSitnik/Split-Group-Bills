@@ -20,18 +20,20 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+/*** class that starts group creation process.
+ * In this step we are updating database with
+ * default information about new group and add its unique name */
 public class AddGroupName extends AppCompatActivity {
 
-    private EditText mGroupName;
+    /***layout*/
+    private EditText mGroupName; /***group name input*/
+    private Button mSubmitGroupName; /***submit button*/
 
-    private Button mSubmitGroupName;
+    /***database*/
+    private DatabaseReference mDatabaseRef; /***general database reference*/
+    private FirebaseUser mCurrentUser; /***id of current user*/
 
-    private DatabaseReference mDatabaseRef;
-
-    private FirebaseUser mCurrentUser;
-
-    private String group_name;
-
+    /***other*/
     private ProgressDialog progressDialog;
 
     @Override
@@ -42,15 +44,13 @@ public class AddGroupName extends AppCompatActivity {
         mGroupName = findViewById(R.id.tv_group_name);
         mSubmitGroupName = findViewById(R.id.btn_submit_name);
 
-        group_name = mGroupName.getText().toString();
-
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
 
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
 
-
         mSubmitGroupName.setOnClickListener(new View.OnClickListener() {
             @Override
+            /***updating group name and default data about group to database*/
             public void onClick(View v) {
 
                 if(mGroupName.getText().toString().replaceAll("\\s+","").equals("")){
@@ -75,7 +75,6 @@ public class AddGroupName extends AppCompatActivity {
                     memberMap.put("Users/" + mCurrentUser.getUid() + "/groups/" + currentDate + "/thumb_image", "default");
                     memberMap.put("Users/" + mCurrentUser.getUid() + "/groups/" + currentDate + "/name", mGroupName.getText().toString());
 
-
                     progressDialog = new ProgressDialog(AddGroupName.this);
                     progressDialog.setTitle("Updating image");
                     progressDialog.setMessage("Creating group.");
@@ -99,19 +98,12 @@ public class AddGroupName extends AppCompatActivity {
                                 startActivity(intent);
                                 finish();
                             }
-
-
                         }
                     });
-
-
 
                 }
             }
         });
 
     }
-
-
-
 }

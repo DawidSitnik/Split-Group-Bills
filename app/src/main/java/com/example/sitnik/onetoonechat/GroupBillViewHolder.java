@@ -6,6 +6,7 @@ import android.widget.TextView;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
+/*** Group view holder*/
 public class GroupBillViewHolder extends RecyclerView.ViewHolder{
 
     View mView;
@@ -15,17 +16,20 @@ public class GroupBillViewHolder extends RecyclerView.ViewHolder{
         mView = itemView;
     }
 
+    /*** sets description */
     public void setDescription(String description){
         TextView singleDescription = mView.findViewById(R.id.bill_single_description);
         singleDescription.setText(description);
     }
 
+    /*** sets information about who paid the bill */
     public void setWhoPaid(String paidByName){
 
         TextView singleWhoLend = mView.findViewById(R.id.bill_single_ows);
         singleWhoLend.setText(paidByName+ " paid " + ShareWithGroup.billAmount + "zl");
     }
 
+    /*** sets informations about how much we lend/borrowed */
     public void setYourPayoff(String billUserAmount) {
 
         TextView payoffField = mView.findViewById(R.id.single_bill_whoLend);

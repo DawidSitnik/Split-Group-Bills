@@ -1,5 +1,6 @@
 package com.example.sitnik.onetoonechat;
 
+/***Users class, used to populate all users view holder*/
 public class Users {
 
     private String name;

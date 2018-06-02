@@ -25,21 +25,29 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class SettleUp extends AppCompatActivity {
 
+    /***layout*/
     private Toolbar mToolbar;
-
     private Button mSettleUp;
     private CircleImageView mLenderImage;
     private CircleImageView mBorrowerImage;
     private TextView mWhoPaid;
     private EditText mAmount;
 
-    private DatabaseReference mDatabase;
-    private FirebaseAuth mAuth;
-    private String mCurrentUserId;
+    /***database*/
+    private DatabaseReference mDatabase; /***reference to general database*/
+    private FirebaseAuth mAuth; /***user firebase authentication*/
+    private String mCurrentUserId; /***id of current user*/
 
-    private String borrower_thumb_image, lender_thumb_image, whoPaid, balance, borrower, date;
+    /***other*/
+    private String borrower_thumb_image; /***borrower image name from databse*/
+    private String lender_thumb_image; /***lender image name from databse*/
+    private String whoPaid; /***id of person who paid a bill*/
+    private String balance; /***total balance with current moment*/
+    private String borrower; /***id of borrower*/
+    private String date; /***current date*/
 
     @Override
+    /***defying variables*/
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settle_up);
@@ -63,6 +71,8 @@ public class SettleUp extends AppCompatActivity {
 
         mSettleUp.setOnClickListener(new View.OnClickListener() {
             @Override
+            /***updating database with new balance and eventually new borrower
+             * depending on who is the borrower now and how much have we settled up*/
             public void onClick(View v) {
 
                 HashMap settleUpMap = new HashMap();
@@ -136,9 +146,9 @@ public class SettleUp extends AppCompatActivity {
             }
         });
 
-        //FILLING IMAGES, TEXT VIEW
         mDatabase.addValueEventListener(new ValueEventListener() {
             @Override
+            /***taking data to fill layout*/
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 balance = dataSnapshot.child("Friends").child(mCurrentUserId).child(user_id).child("balance").getValue().toString();
@@ -160,17 +170,11 @@ public class SettleUp extends AppCompatActivity {
                 Picasso.get().load(lender_thumb_image).placeholder(R.drawable.default_avatar).into(mLenderImage);
                 Picasso.get().load(borrower_thumb_image).placeholder(R.drawable.default_avatar).into(mBorrowerImage);
                 mWhoPaid.setText(whoPaid);
-
-
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
+            public void onCancelled(DatabaseError databaseError) { }
         });
-
-
 
     }
 }

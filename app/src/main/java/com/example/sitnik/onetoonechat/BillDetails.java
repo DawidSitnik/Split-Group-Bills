@@ -1,8 +1,5 @@
 package com.example.sitnik.onetoonechat;
 
-import android.content.Intent;
-
-import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -16,30 +13,46 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
+/*** Class activity starts after clicking on single bill, from bills list with one friend.
+ * We can see details about payment here and also delete bill from list and update database */
 public class BillDetails extends AppCompatActivity {
 
-    private CircleImageView mImage;
-    private FloatingActionButton mOptions;
-    private TextView mDescription;
-    private TextView mAmount;
-    private TextView mDate;
-    private TextView mDetail1;
-    private TextView mDetail2;
+    /***layout*/
+    private CircleImageView mImage; /***bill image*/
+    private FloatingActionButton mOptions; /***will be developed later*/
+    private TextView mDescription; /***bill description*/
+    private TextView mAmount; /***amount of bill*/
+    private TextView mDate; /***date of bill*/
+    private TextView mDetail1; /***how much someone paid*/
+    private TextView mDetail2; /***how much someone ows*/
     private Button mDelete;
 
+    /***database*/
     private DatabaseReference mDatabase;
     private FirebaseAuth mAuth;
     private String mCurrentUserId;
 
-    private String billPayedBy, billAmount, billDescription, friendName, yourName, user_id, bill_date, detail1, detail2, balance, borrower, splitting_type;
-    private double billAmount2;
+    /***other*/
+    private String billPayedBy; /***id of user who paid the bill*/
+    private String billAmount; /***amount of bill*/
+    private String billDescription; /***bill description*/
+    private String friendName; /***name of the friend*/
+    private String yourName; /***user name*/
+    private String user_id; /***friend id*/
+    private String bill_date; /***bill date*/
+    private String detail1; /***bill payer details*/
+    private String detail2; /***information about who ows how much*/
+    private String balance; /***database*/
+    private String borrower; /***current balance with friend*/
+    private String splitting_type; /***type of bill splitting*/
+
+    private double amountDouble; /***bill amount parsed to double*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +77,7 @@ public class BillDetails extends AppCompatActivity {
         splitting_type = getIntent().getStringExtra("splitting_type");
 
         mDatabase.addValueEventListener(new ValueEventListener() {
+            /***getting velues from database*/
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
@@ -77,9 +91,9 @@ public class BillDetails extends AppCompatActivity {
                     billAmount = dataSnapshot.child("Friends").child(mCurrentUserId).child(user_id).child("bills").child(bill_date).child("amount").getValue().toString();
 
                     if (splitting_type.equals("you_owe_the_full_amount") || splitting_type.equals("they_owe_the_full_amount")) {
-                        billAmount2 = Double.parseDouble(billAmount);
+                        amountDouble = Double.parseDouble(billAmount);
                     } else {
-                        billAmount2 = Double.parseDouble(billAmount) / 2;
+                        amountDouble = Double.parseDouble(billAmount) / 2;
                     }
                     friendName = dataSnapshot.child("Users").child(user_id).child("name").getValue().toString();
                     yourName = dataSnapshot.child("Users").child(mCurrentUserId).child("name").getValue().toString();
@@ -92,12 +106,12 @@ public class BillDetails extends AppCompatActivity {
                     }
 
                     if (billPayedBy.equals("me")) {
-                        detail1 = yourName + " paid " + billAmount + "zl and owes " + billAmount2 + "zl";
-                        detail2 = friendName + " owes " + billAmount2 + "zl";
+                        detail1 = yourName + " paid " + billAmount + "zl and owes " + amountDouble + "zl";
+                        detail2 = friendName + " owes " + amountDouble + "zl";
                     }
                     if (billPayedBy.equals("friend")) {
-                        detail1 = friendName + " paid " + billAmount + "zl and owes " + billAmount2 + "zl";
-                        detail2 = yourName + " owes " + billAmount2 + "zl";
+                        detail1 = friendName + " paid " + billAmount + "zl and owes " + amountDouble + "zl";
+                        detail2 = yourName + " owes " + amountDouble + "zl";
                     }
 
                     mDetail1.setText(detail1);
@@ -109,6 +123,7 @@ public class BillDetails extends AppCompatActivity {
             }
 
             @Override
+            /*** handeling a situation when user will want to delete bill. Updating database, changing balance and borrower if required.*/
             public void onCancelled(DatabaseError databaseError) {
 
             }

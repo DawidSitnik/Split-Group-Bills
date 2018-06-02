@@ -11,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,35 +23,33 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import de.hdodenhof.circleimageview.CircleImageView;
-
-
+/*** Class witch activity starts after adding group image.
+ * In this step we are adding new members to group */
 public class CreateGroupActivity extends AppCompatActivity {
 
+    /*** layout */
     private Toolbar mToolbarGroup;
-
     private FloatingActionButton mAddToFriend;
     private Button mCreateGroup;
-
     private TextView mGroupName;
-
     private RecyclerView mRecyclerView;
 
-    private DatabaseReference mUsersDatabase;
-    private DatabaseReference mDatabaseRef;
-
+    /*** database */
+    private DatabaseReference mUsersDatabase; /*** reference to users database */
+    private DatabaseReference mDatabaseRef; /*** reference to general database */
     private FirebaseAuth mAuth;
-
     private String mCurrentUserId;
 
-    private Query query;
+    /*** other */
+    private Query query; /*** querry to fill informations group members list */
 
-    private String group_date, name_display, user_id;
+    private String group_date; /*** group creation date */
+    private String name_display; /*** group name */
+    private String user_id; /*** group member id (depending on position on the list) */
 
 
     @Override
@@ -86,11 +83,8 @@ public class CreateGroupActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         mCurrentUserId = mAuth.getCurrentUser().getUid();
-
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
-
         mUsersDatabase = FirebaseDatabase.getInstance().getReference().child("Users");
-        mUsersDatabase.keepSynced(true);
 
         mRecyclerView = findViewById(R.id.list_group_members);
         mRecyclerView.setHasFixedSize(true);
@@ -110,9 +104,8 @@ public class CreateGroupActivity extends AppCompatActivity {
     }
 
 
-
-
     @Override
+    /*** redreshing view holder on resume */
     protected void onResume() {
         super.onResume();
 
@@ -120,7 +113,7 @@ public class CreateGroupActivity extends AppCompatActivity {
 
     }
 
-
+    /*** filling view holder with data and displaying it in the list*/
     protected void displayViewHolder(){
 
         FirebaseRecyclerOptions<Friends> options =
@@ -156,11 +149,10 @@ public class CreateGroupActivity extends AppCompatActivity {
 
                         } else {
 
-
-
+                        /*** map to delete user */
                         Map deleteMemberMap = new HashMap();
 
-                        deleteMemberMap.put("Groups/" + group_date + "/members/" + user_id, null);
+                        deleteMemberMap.put("Groups/" + group_date + "/members/" + user_id, null); // putting null value to delete member from database
 
                         mDatabaseRef.updateChildren(deleteMemberMap);
                     }
@@ -186,45 +178,12 @@ public class CreateGroupActivity extends AppCompatActivity {
                         }
                     });
                 }
-
-
             }
-
-
-
         };
 
-
         mRecyclerView.setAdapter(adapter);
-        //adapter.notifyDataSetChanged();
-
-    }
-
-    public static class FriendsViewHolder extends RecyclerView.ViewHolder{
-
-        View mView;
-
-        public FriendsViewHolder(View itemView){
-            super(itemView);
-            mView = itemView;
-        }
-
-
-        public void setName(String name){
-            TextView userNameView = mView.findViewById(R.id.single_user_name);
-            userNameView.setText(name);
-        }
-
-        public void setStatus(String status){
-            TextView userStatusView = mView.findViewById(R.id.single_user_status);
-            userStatusView.setText(status);
-        }
-
-        public void setThumbImage(String thumb_image) {
-            CircleImageView userImageView = mView.findViewById(R.id.user_single_image);
-            Picasso.get().load(thumb_image).placeholder(R.drawable.default_avatar).into(userImageView);
-        }
 
 
     }
+
 }

@@ -20,16 +20,16 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class StatusActivity extends AppCompatActivity {
 
+    /***layout*/
     private Toolbar toolbar;
-
     private EditText et_statusUpdate;
     private Button btn_statusUpdate;
 
-    //Firebase
+    /***database*/
     private DatabaseReference database;
     private FirebaseUser currentUser;
 
-    //Progress
+    /***other*/
     private ProgressDialog progressDialog;
 
     @Override
@@ -40,9 +40,8 @@ public class StatusActivity extends AppCompatActivity {
         et_statusUpdate = findViewById(R.id.updateStatus);
         btn_statusUpdate = findViewById(R.id.updateStatusButton);
 
-        //Firebase
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        String uid = currentUser.getUid();
+        String uid = currentUser.getUid(); /***current user id*/
         database = FirebaseDatabase.getInstance().getReference().child("Users").child(uid);
 
         String statusValue = getIntent().getStringExtra("status_value");
@@ -53,6 +52,7 @@ public class StatusActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("Account Status");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        /***updating database with new status*/
         btn_statusUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

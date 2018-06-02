@@ -1,9 +1,6 @@
-//notifications are just for single device, if we want to use multiple devices we have to change few things
-
 package com.example.sitnik.onetoonechat;
 
 import android.app.ProgressDialog;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -12,9 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -29,26 +24,26 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.hdodenhof.circleimageview.CircleImageView;
-
 public class ProfileActivity extends AppCompatActivity {
 
-    private TextView mName, mStatus, mFriendsCount;
+    /***layout*/
+    private TextView mName, mStatus;
     private Button mRequestFriend, mDeclineFriend;
     private ImageView mProfileImage;
 
-    private DatabaseReference mUsersDatabase;
-    private DatabaseReference mFriendsRequestDatabase;
-    private DatabaseReference mFriendDatabase;
-    private DatabaseReference mNotificationDatabase;
-    private DatabaseReference mDatabaseRef;
+    /***database*/
+    private DatabaseReference mUsersDatabase; /***reference to users database*/
+    private DatabaseReference mFriendsRequestDatabase; /***reference to friends request database*/
+    private DatabaseReference mFriendDatabase; /***reference to friends database*/
+    private DatabaseReference mDatabaseRef;/***general reference to database*/
 
     private FirebaseUser mCurrentUser;
 
     private ProgressDialog mProgressDialog;
 
-    private String mCurrent_state;
+    private String mCurrent_state; /***depending on if user already sent us friend req, is our friend etc.*/
 
+    /***defying variables*/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,14 +54,12 @@ public class ProfileActivity extends AppCompatActivity {
         mUsersDatabase = FirebaseDatabase.getInstance().getReference().child("Users").child(userId);
         mFriendsRequestDatabase = FirebaseDatabase.getInstance().getReference().child("Friend_req");
         mFriendDatabase = FirebaseDatabase.getInstance().getReference().child("Friends");
-        mNotificationDatabase = FirebaseDatabase.getInstance().getReference().child("Notifications");
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
 
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
 
         mName = findViewById(R.id.et_name_profile);
         mStatus = findViewById(R.id.et_status_profile);
-        mFriendsCount = findViewById(R.id.et_friends_profile);
         mRequestFriend = findViewById(R.id.btn_friend_request);
         mDeclineFriend = findViewById(R.id.btn_decline_profile);
         mProfileImage = findViewById(R.id.img_main_profile);
@@ -87,6 +80,7 @@ public class ProfileActivity extends AppCompatActivity {
                 String status = dataSnapshot.child("status").getValue().toString();
                 String image = dataSnapshot.child("image").getValue().toString();
 
+                //making decline friend button invisible
                 mDeclineFriend.setVisibility(View.INVISIBLE);
                 mDeclineFriend.setEnabled(false);
 
@@ -98,6 +92,10 @@ public class ProfileActivity extends AppCompatActivity {
 
                 mFriendsRequestDatabase.child(mCurrentUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
+                    /***depending on request type value taken from database:
+                     * -changes mCurrent_state
+                     * -enable/disable decline button
+                     * -changes text in first button*/
                     public void onDataChange(DataSnapshot dataSnapshot) {
 
                         if(dataSnapshot.hasChild(userId)){
@@ -149,37 +147,36 @@ public class ProfileActivity extends AppCompatActivity {
                                 @Override
                                 public void onCancelled(DatabaseError databaseError) {
                                     mProgressDialog.dismiss();
-
                                 }
                             });
                         }
                     }
 
                     @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
+                    public void onCancelled(DatabaseError databaseError) {}
                 });
 
 
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
+            public void onCancelled(DatabaseError databaseError) {}
         });
 
         //---------------------- ADD FRIENDS BUTTON -----------------------------
         mRequestFriend.setOnClickListener(new View.OnClickListener() {
+            /***
+             * Depending on state we can
+             * -send friend request
+             * -accept/decline friend request
+             * -delete friend
+             * */
             @Override
             public void onClick(View v) {
 
                 mRequestFriend.setEnabled(false);
 
-
                 //---------NOT FRIEND---------
-
                 if(mCurrent_state.equals("not_friends")){
 
                     DatabaseReference newNotificationer = mDatabaseRef.child("Notifications").child(userId).push();
@@ -269,11 +266,8 @@ public class ProfileActivity extends AppCompatActivity {
                             }
 
                             mRequestFriend.setEnabled(true);
-
                         }
                     });
-
-
 
                 }
 
@@ -316,12 +310,7 @@ public class ProfileActivity extends AppCompatActivity {
 
                         }
                     });
-
                 }
-
-
-
-
             }
         });
 

@@ -43,28 +43,23 @@ import id.zelory.compressor.Compressor;
 public class SettingsActivity extends AppCompatActivity {
 
     private DatabaseReference database;
-    private FirebaseDatabase currentUser;
 
-    //Android Layout
+    /***layout*/
     private TextView name_settings;
     private TextView status_settings;
     private CircleImageView image_settings;
-
-    //Buttons
     private Button btn_image_settings;
     private Button btn_status_settings;
 
-    private static final int GALLERY_PICK = 1;
-
-    //Storage Firebase
+    /***database*/
     private StorageReference storageReference;
 
-    //Progress bar
+    /***other*/
+    private static final int GALLERY_PICK = 1; /***required for changing profile picture*/
     private ProgressDialog progressDialog;
 
-
-
     @Override
+    /***defying variables*/
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
@@ -84,6 +79,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         storageReference = FirebaseStorage.getInstance().getReference();
 
+        /***starting new activity to change a status*/
         btn_status_settings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -96,6 +92,7 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
 
+        /***changing picture*/
         btn_image_settings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -107,16 +104,14 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
 
-
-
         database.addValueEventListener(new ValueEventListener() {
+            /***taking values from database*/
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 String name = dataSnapshot.child("name").getValue().toString();
                 final String image = dataSnapshot.child("image").getValue().toString();
                 String status = dataSnapshot.child("status").getValue().toString();
-                String thumb = dataSnapshot.child("thumb_image").getValue().toString();
 
                 name_settings.setText(name);
                 status_settings.setText(status);
@@ -142,17 +137,15 @@ public class SettingsActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
+            public void onCancelled(DatabaseError databaseError) {}
         });
 
     }
 
     @Override
+    /***compressing image to thumb image and updating database*/
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == GALLERY_PICK && resultCode == RESULT_OK){
-
 
             Uri imageUri = data.getData();
 
@@ -181,8 +174,7 @@ public class SettingsActivity extends AppCompatActivity {
                 FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
                 String uid = currentUser.getUid();
 
-                try {
-
+                try { //compressing image to thumb image
                     Bitmap thumbnailImage = new Compressor(this)
                             .setMaxHeight(200)
                             .setMaxWidth(200)
@@ -245,13 +237,10 @@ public class SettingsActivity extends AppCompatActivity {
 
 
                 } catch (IOException e) {
-
                     e.printStackTrace();
-
                 }
 
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
-
                 Exception error = result.getError();
             }
         }

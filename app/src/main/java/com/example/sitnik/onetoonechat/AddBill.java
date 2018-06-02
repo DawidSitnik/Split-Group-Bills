@@ -1,6 +1,5 @@
 package com.example.sitnik.onetoonechat;
 
-import android.content.Intent;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,13 +19,13 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.squareup.picasso.Picasso;
 
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+/*** Updates database with information about single bill shared with one friend */
 public class AddBill extends AppCompatActivity {
 
     /***layout*/
@@ -41,20 +40,21 @@ public class AddBill extends AppCompatActivity {
     private String mCurrentUserId;
 
     /***activity variable*/
-    private String balance;
-    private String borrower;
-    private String amount;
-    private String description;
-    private String user_id;
-    private String date;
-    private String splitting_type;
+    private String balance; /***amount that friend/user have to pay*/
+    private String borrower; /***user id/ friend id, depending who ows money*/
+    private String amount;  /***amount of current bill*/
+    private String description;  /***bill description*/
+    private String user_id; /***id of current user*/
+    private String date;  /***date of bill, bills are identified by this variable in firebase database*/
+    private String splitting_type;  /***type of splitting the bill*/
 
-    private double balanceDouble, amountDouble;
+    private double balanceDouble; /***String balance converted to double*/
+    private double amountDouble; /***String amount converted to double*/
 
-    private Spinner mSpinner;
+    private Spinner mSpinner;  /***Different types of bill splitting*/
     private static final String[]paths = {"Paid by you and split equally", "Paid by the other person and split equally", "You owe the full amount", "They owe the full amount", "More options"};
 
-    Map addBillMap = new HashMap();
+    Map addBillMap = new HashMap();  /***map to update a database after clicking on add button*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,15 +79,14 @@ public class AddBill extends AppCompatActivity {
 
         user_id = getIntent().getStringExtra("user_id");
 
-        mDatabase.addValueEventListener(new ValueEventListener() {
+        mDatabase.child("Friends").child(mCurrentUserId).child(user_id).addValueEventListener(new ValueEventListener() {  /***gets values of borrower and balance from firebase*/
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                balance = dataSnapshot.child("Friends").child(mCurrentUserId).child(user_id).child("balance").getValue().toString();
+                balance = dataSnapshot.child("balance").getValue().toString();
 
-                //take borrower only if it is !0 ,in other case we will type borrower manually depending on spliting option
-                if(!balance.equals("0")){
-                    borrower = dataSnapshot.child("Friends").child(mCurrentUserId).child(user_id).child("borrower").getValue().toString();
+                if(!balance.equals("0")){ //take borrower only if it is !0 ,in other case we will type borrower manually depending on spliting option
+                    borrower = dataSnapshot.child("borrower").getValue().toString();
                 }
 
             }
@@ -105,6 +104,7 @@ public class AddBill extends AppCompatActivity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mSpinner.setAdapter(adapter);
         mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            /***Depending on selected option in spinner change value of splitting_type*/
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
@@ -136,6 +136,7 @@ public class AddBill extends AppCompatActivity {
         });
 
         mAdd.setOnClickListener(new View.OnClickListener() {
+            /***Update database depending on splitting type*/
             @Override
             public void onClick(View v) {
 
@@ -188,7 +189,7 @@ public class AddBill extends AppCompatActivity {
 
     }
 
-
+    /***checking if our payoff with friend equals 0 and add info about borrower to hashmap*/
     private void checkIfBalance0(String borrower1, String borrower2){
 
         if(balance.equals("0")){
@@ -213,7 +214,7 @@ public class AddBill extends AppCompatActivity {
         }
 
     }
-
+    /***adding values to map depending on arguments borrower1 and borrower2*/
     private void paidBySplitEqually(String borrower1, String borrower2){
 
         if(borrower.equals(borrower2)){
@@ -260,7 +261,7 @@ public class AddBill extends AppCompatActivity {
         });
 
     }
-
+    /***splitting money with split equally paid by me option selected*/
     private void paidByMeSplitEqually(String borrower1, String borrower2){
 
         checkIfBalance0(borrower1, borrower2);
@@ -275,7 +276,7 @@ public class AddBill extends AppCompatActivity {
     }
 
 
-
+    /***splitting money with split equally paid by friend option selected*/
     private void paidByOtherPersonSplitEqually(String borrower1, String borrower2) { // borrower1 = me, borrower2 = friend
 
         checkIfBalance0(borrower1, borrower2);
@@ -290,7 +291,7 @@ public class AddBill extends AppCompatActivity {
 
     }
 
-
+    /***splitting money with you owe the full amount option selected*/
     private void youOweTheFullAMount(String borrower1, String borrower2) {
 
         checkIfBalance0(borrower1, borrower2);
@@ -305,7 +306,7 @@ public class AddBill extends AppCompatActivity {
 
     }
 
-
+    /***splitting money with they owe the full amount option selected*/
     private void theyOweTheFullAmount(String borrower1, String borrower2) {
 
         checkIfBalance0(borrower1, borrower2);
@@ -320,7 +321,7 @@ public class AddBill extends AppCompatActivity {
 
     }
 
-
+    /***will be developed in further state of app*/
     private void moreOptions() {
     }
 

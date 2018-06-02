@@ -3,7 +3,6 @@ package com.example.sitnik.onetoonechat;
 
 import android.app.NotificationManager;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -12,7 +11,7 @@ import com.google.firebase.messaging.RemoteMessage;
 //tutaj w NotificationCompat mozemy zmienic obrazek powiadomienia
 
 /**
- *
+ *Notification class, will be developed later
  */
 public class MessageService extends FirebaseMessagingService {
 

@@ -30,12 +30,13 @@ import com.squareup.picasso.Picasso;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
+/***class activity starts after choosing friend from users friend list.
+ * It contains general payoff with the friend: list of bills and current balance*/
 public class ShareWithFriend extends AppCompatActivity {
 
+    /***layout*/
     private Toolbar mToolbar;
-
     private RecyclerView mBillsList;
-
     private FloatingActionButton mAddBill;
     private Button mSettleUp;
     private CircleImageView mProfileImage;
@@ -43,22 +44,25 @@ public class ShareWithFriend extends AppCompatActivity {
     private TextView mName;
     private TextView mAmount;
 
+    /***database*/
     private DatabaseReference mDatabase;
-
     private FirebaseAuth mAuth;
     private String mCurrentUserId;
 
-    private Query query;
+    /***other*/
+    private Query query; /***query to database fill view holder with bills*/
 
-    private double billAmount2;
-    private String who_ows;
-    private String billWhoOws;
-    private String billWhoLend;
-    private String billPayedBy;
-    private String billAmount;
-    private String balance, borrower, splitting_type;
+    private double billAmount2; /***bill amount parsed to double*/
+    private String who_ows; /***general information witch is displayed in mWhoOwes field informing about payoff*/
+    private String billWhoOws; /***information displayed in single bill about how much user ows */
+    private String billWhoLend; /***information displayed in single bill about how much user lend */
+    private String billPayedBy; /***id of user who paid the bill*/
+    private String billAmount; /***single bill amount */
+    private String borrower; /***id of borrower*/
+    private String splitting_type; /***type of splitting */
 
     @Override
+    /***defying variables*/
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_share_with_friend);
@@ -77,19 +81,19 @@ public class ShareWithFriend extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         mCurrentUserId = mAuth.getCurrentUser().getUid();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
 
         mBillsList = findViewById(R.id.shareFriends_billsList);
         mBillsList.setHasFixedSize(true);
         mBillsList.setLayoutManager(new LinearLayoutManager(ShareWithFriend.this));
 
-        mDatabase = FirebaseDatabase.getInstance().getReference();
-
+        /***friend id*/
         final String user_id = getIntent().getStringExtra("user_id");
-
 
         //SETTLE UP LISTENER
         mSettleUp.setOnClickListener(new View.OnClickListener() {
             @Override
+            /***starting settle up activity*/
             public void onClick(View v) {
 
                 Intent intent = new Intent(ShareWithFriend.this, SettleUp.class);
@@ -101,12 +105,12 @@ public class ShareWithFriend extends AppCompatActivity {
         //FILLING FRIEND INFO
         mDatabase.addValueEventListener(new ValueEventListener() {
             @Override
+            /***taking data from database*/
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 String name = dataSnapshot.child("Users").child(user_id).child("name").getValue().toString();
                 String thumb_image = dataSnapshot.child("Users").child(user_id).child("thumb_image").getValue().toString();
                 String amount = dataSnapshot.child("Friends").child(mCurrentUserId).child(user_id).child("balance").getValue().toString();
-                balance = dataSnapshot.child("Friends").child(mCurrentUserId).child(user_id).child("balance").getValue().toString();
                 borrower = dataSnapshot.child("Friends").child(mCurrentUserId).child(user_id).child("borrower").getValue().toString();
                 String friend_name = dataSnapshot.child("Users").child(user_id).child("name").getValue().toString();
 
@@ -129,18 +133,16 @@ public class ShareWithFriend extends AppCompatActivity {
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
+            public void onCancelled(DatabaseError databaseError) {}
         });
 
         mAddBill.setOnClickListener(new View.OnClickListener() {
             @Override
+            /***starting add bill activity*/
             public void onClick(View v) {
                 Intent intent = new Intent(ShareWithFriend.this, AddBill.class);
                 intent.putExtra("user_id", user_id);
                 startActivity(intent);
-
             }
         });
 
@@ -211,6 +213,7 @@ public class ShareWithFriend extends AppCompatActivity {
 
                 billsViewHolder.mView.setOnClickListener(new View.OnClickListener() {
                     @Override
+                    /***starting chosen bill activity*/
                     public void onClick(View v) {
 
                         Intent intent = new Intent (ShareWithFriend.this, BillDetails.class);
@@ -228,6 +231,7 @@ public class ShareWithFriend extends AppCompatActivity {
 
     }
 
+    /***bill view holder for payoff with single friend*/
     public class BillsViewHolder extends RecyclerView.ViewHolder{
 
         View mView;
@@ -242,6 +246,7 @@ public class ShareWithFriend extends AppCompatActivity {
             singleDescription.setText(description);
         }
 
+        /***set text with informations about who paid the bill*/
         public void setWhoOws (){
 
             TextView singleWhoOws = mView.findViewById(R.id.bill_single_ows);
@@ -256,6 +261,7 @@ public class ShareWithFriend extends AppCompatActivity {
             singleWhoOws.setText(billWhoOws);
         }
 
+        /***set text with information about how much user lend/borrowed*/
         public void setWhoLend(){
 
             TextView singleWhoLend = mView.findViewById(R.id.single_bill_whoLend);

@@ -1,5 +1,6 @@
 package com.example.sitnik.onetoonechat;
 
+/*** class to populate friends view holder */
 public class Friends {
 
     public Friends() {
