@@ -123,7 +123,7 @@ public class ShareWithGroup extends AppCompatActivity {
 
                 for (DataSnapshot addressSnapshot: dataSnapshot.child("Groups").child(group_id).child("members").getChildren()) {
 
-                    hashMap.put("Groups/" + group_id + "/bills/" + bill_date + "/split_with/" + addressSnapshot.getKey(), "");
+                    hashMap.put("Groups/" + group_id + "/bills/" + bill_date + "/split_with/" + addressSnapshot.getKey(), "0");
 
                 }
                 mName.setText(name);
@@ -208,11 +208,14 @@ public class ShareWithGroup extends AppCompatActivity {
                             billPayedBy = dataSnapshot.child("Groups").child(group_id).child("bills").child(list_bill_date).child("paid_by").getValue().toString();
                             billAmount = dataSnapshot.child("Groups").child(group_id).child("bills").child(list_bill_date).child("amount").getValue().toString();
                             splitting_type = dataSnapshot.child("Groups").child(group_id).child("bills").child(list_bill_date).child("splitting_type").getValue().toString();
-                            billUserAmount = dataSnapshot.child("Groups").child(group_id).child("bills").child(list_bill_date).child("split_with").child(mCurrentUserId).getValue().toString();
+                            if(dataSnapshot.child("Groups").child(group_id).child("bills").child(list_bill_date).child("split_with").child(mCurrentUserId).exists() ) {
+                                billUserAmount = dataSnapshot.child("Groups").child(group_id).child("bills").child(list_bill_date).child("split_with").child(mCurrentUserId).getValue().toString();
+                                billsViewHolder.setYourPayoff(billUserAmount);
+                            }else billsViewHolder.setYourPayoff("0");
                             billPayedByName = dataSnapshot.child("Users").child(billPayedBy).child("name").getValue().toString();
 
                             billsViewHolder.setWhoPaid(billPayedByName);
-                            billsViewHolder.setYourPayoff(billUserAmount);
+
                             billsViewHolder.setDescription(billDescription);
                         }
 

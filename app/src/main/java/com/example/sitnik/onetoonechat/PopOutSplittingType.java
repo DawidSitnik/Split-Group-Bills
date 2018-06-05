@@ -180,7 +180,7 @@ public class PopOutSplittingType extends AppCompatActivity {
                     public void onClick(View v) {
 
                         if(checkBox.isChecked()){ //adds member to hash map is his field is checked
-                            hashMap.put("Groups/" + group_date + "/bills/" + bill_date + "/split_with/" + list_member_id, "");
+                            hashMap.put("Groups/" + group_date + "/bills/" + bill_date + "/split_with/" + list_member_id, "0");
                             if(AddBillGroup.payers_count == -1) AddBillGroup.payers_count = 1;
                             else AddBillGroup.payers_count++;
                         } else{

@@ -43,6 +43,9 @@ public class GroupBillViewHolder extends RecyclerView.ViewHolder{
         } else{
             payoffText = "You lend " + billUserAmountDouble + "zl";
         }
+        if (billUserAmountDouble == 0){
+            payoffText = "You didn't participate";
+        }
 
         payoffField.setText(payoffText);
     }
